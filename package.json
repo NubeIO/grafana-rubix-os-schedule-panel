@@ -1,0 +1,31 @@
+{
+  "name": "nube-i-o-grafana-flow-framework-schedule-pane",
+  "version": "1.0.0",
+  "description": "Panel to control schedule for devices",
+  "scripts": {
+    "build": "grafana-toolkit plugin:build",
+    "test": "grafana-toolkit plugin:test",
+    "dev": "grafana-toolkit plugin:dev",
+    "watch": "grafana-toolkit plugin:dev --watch",
+    "sign": "grafana-toolkit plugin:sign",
+    "start": "yarn watch"
+  },
+  "author": "Ritesh Shakya",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@grafana/data": "7.5.0",
+    "@grafana/toolkit": "7.5.0",
+    "@grafana/ui": "7.5.0",
+    "emotion": "10.0.27"
+  },
+  "dependencies": {
+    "@grafana/runtime": "^7.5.0",
+    "@material-ui/core": "^4.11.0",
+    "@material-ui/icons": "^4.9.1",
+    "react": "17.0.2",
+    "react-dom": "17.0.2"
+  },
+  "engines": {
+    "node": ">=12"
+  }
+}
