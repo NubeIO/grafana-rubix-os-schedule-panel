@@ -55,6 +55,7 @@ function ScheduleCalendar(props: Props) {
   }
 
   const staticLocalizer = momentLocalizer(moment);
+  const timezone = options.timezone || "UTC";
 
   const [eventCollection, setEventCollection] = useState<EventOutput[]>([]);
   const [visibleDate, setVisibleDate] = useState(moment());
@@ -71,7 +72,7 @@ function ScheduleCalendar(props: Props) {
     const { schedule: { schedules: { events = {}, weekly = {} } } } = value || {};
     let eventsCollection: EventOutput[] = [];
 
-    const isolatedEvents = extractEvents(events);
+    const isolatedEvents = extractEvents(events, timezone);
 
     const days = getDaysArrayByMonth(visibleDate);
 
@@ -96,7 +97,7 @@ function ScheduleCalendar(props: Props) {
       const dayString = DAY_MAP[dayNumeric];
       const dayEventsMap = dayEventMap[dayString];
       if (dayEventsMap) {
-        const dayEvents = extractEvents(dayEventsMap, {
+        const dayEvents = extractEvents(dayEventsMap, timezone, {
           day,
           dayString,
         });
@@ -138,7 +139,7 @@ function ScheduleCalendar(props: Props) {
     setIsOpenModal(true);
   };
 
-  const syncOnMqttServer = (output: RawData) => {
+  const syncOnServer = (output: RawData) => {
     syncData(output);
     setIsOpenModal(false);
   };
@@ -153,7 +154,7 @@ function ScheduleCalendar(props: Props) {
     } else {
       output.events[id] = event;
     }
-    syncOnMqttServer(output);
+    syncOnServer(output);
   };
 
   const handleModalDelete = (id: string) => {
@@ -163,7 +164,7 @@ function ScheduleCalendar(props: Props) {
     } else {
       delete output.events[id];
     }
-    syncOnMqttServer(output);
+    syncOnServer(output);
   };
 
   const onNavigate = (visibleDate: any) => {
@@ -184,70 +185,65 @@ function ScheduleCalendar(props: Props) {
     };
   };
 
+
   return (
     <>
-      <TimezoneToggle timezone={options.timezone}>
-        {(toggleTimezone, timezone, timezoneName) => (
-          <>
-            <ToolbarButtonRow>
-              <ToolbarButton
-                variant="default"
-                icon="plus-circle"
-                onClick={toggleTimezone}
-              >{`Timezone: ${timezoneName || 'UTC'}`}</ToolbarButton>
-              <div className={classes.blankSpace} />
-              <ToolbarButton
-                variant="default"
-                icon="plus-circle"
-                onClick={() => openGenericDialog(DIALOG_NAMES.holidayDialog, { isAddForm: true })}
-              >Holiday</ToolbarButton>
-              <ToolbarButton
-                variant="default"
-                icon="plus-circle"
-                onClick={() => addEvent(true)}
-                disabled={options.disableWeeklyEvent}
-              >Weekly Event</ToolbarButton>
-              <ToolbarButton
-                variant="default"
-                icon="plus-circle"
-                onClick={() => addEvent(false)}
-                disabled={options.disableEvent}
-              >Event</ToolbarButton>
-            </ToolbarButtonRow>
-            <div className={classes.calendar}>
-              <CalendarHOC
-                value={value}
-                events={eventCollection}
-                timezone={timezone}
-                startAccessorField="start"
-                endAccessorField="end"
-                onNavigate={onNavigate}
-                onSelectEvent={onSelectEvent}
-                eventPropGetter={eventStyleGetter}
-                localizer={staticLocalizer}
-                components={{
-                  event: CustomEvent,
-                  toolbar: HeaderCellContent,
-                }}
-                defaultView="week"
-                date={visibleDate.toDate()}
-              />
-            </div>
-            <EventModal
-              isOpenModal={isOpenModal}
-              scheduleNames={props.scheduleNames}
-              isWeekly={isWeekly}
-              operation={operation}
-              eventOutput={eventOutput}
-              options={options}
-              timezone={timezone}
-              onClose={onModalClose}
-              onSubmit={handleModalSubmit}
-              onDelete={handleModalDelete}
-            />
-          </>
-        )}
-      </TimezoneToggle>
+      <ToolbarButtonRow>
+        <ToolbarButton
+          variant="default"
+          disabled>
+          {timezone}
+        </ToolbarButton>
+        <div className={classes.blankSpace} />
+        <ToolbarButton
+          variant="default"
+          icon="plus-circle"
+          onClick={() => openGenericDialog(DIALOG_NAMES.holidayDialog, { isAddForm: true })}
+        >Holiday</ToolbarButton>
+        <ToolbarButton
+          variant="default"
+          icon="plus-circle"
+          onClick={() => addEvent(true)}
+          disabled={options.disableWeeklyEvent}
+        >Weekly Event</ToolbarButton>
+        <ToolbarButton
+          variant="default"
+          icon="plus-circle"
+          onClick={() => addEvent(false)}
+          disabled={options.disableEvent}
+        >Event</ToolbarButton>
+      </ToolbarButtonRow>
+      <div className={classes.calendar}>
+        <CalendarHOC
+          value={value}
+          events={eventCollection}
+          startAccessorField="start"
+          endAccessorField="end"
+          timezone={timezone}
+          onNavigate={onNavigate}
+          onSelectEvent={onSelectEvent}
+          eventPropGetter={eventStyleGetter}
+          localizer={staticLocalizer}
+          components={{
+            event: CustomEvent,
+            toolbar: HeaderCellContent,
+          }}
+          defaultView="week"
+          date={visibleDate.toDate()}
+        />
+      </div>
+      <EventModal
+        isOpenModal={isOpenModal}
+        scheduleNames={props.scheduleNames}
+        isWeekly={isWeekly}
+        operation={operation}
+        eventOutput={eventOutput}
+        options={options}
+        timezone={timezone}
+        onClose={onModalClose}
+        onSubmit={handleModalSubmit}
+        onDelete={handleModalDelete}
+      />
       {isRunning && (
         <div className={classes.spinner}>
           <Spinner size={12} />
@@ -318,7 +314,7 @@ const HeaderCellContent: React.FC<any> = (props: any) => {
           </ToolbarButton>
           <ToolbarButton
             variant="default"
-            onClick={() => onNavigate('PREVIOUS')}
+            onClick={() => onNavigate('PREV')}
           >
             {messages.previous}
           </ToolbarButton>

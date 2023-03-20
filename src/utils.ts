@@ -1,3 +1,4 @@
+import { DATE_FORMAT } from 'components/EventModal';
 import moment from 'moment-timezone';
 import { ExtractionOption, Weekly, Event, EventOutput } from './types';
 
@@ -80,7 +81,7 @@ export function getStartAndEndWithTimezone(baseDate: moment.Moment, time: string
  * @param time - Time in format HH:mm:ss or HH:mm
  * @return {moment} Time in UTC
  */
-export function getUTCFromStartAndEnd(baseDate: moment.Moment, time: string): moment.Moment {
+export function getTimezoneFromStartAndEnd(baseDate: moment.Moment, time: string, timezone: string): moment.Moment {
   const startTime = time.split(':');
   return moment.tz(
     {
@@ -91,7 +92,7 @@ export function getUTCFromStartAndEnd(baseDate: moment.Moment, time: string): mo
       minute: startTime[1],
       second: startTime[2] || 0,
     },
-    'UTC'
+    timezone
   );
 }
 
@@ -100,24 +101,25 @@ export function getUTCFromStartAndEnd(baseDate: moment.Moment, time: string): mo
  * @param {ExtractionOption} options - Options used while extracting data from event
  * @return {{startDate: (moment.Moment), endDate: (moment.Moment)}}
  */
-function getStartAndEndDate(
+function getStartAndEndDateTimezone(
   event: Weekly,
-  options: ExtractionOption
+  options: ExtractionOption,
+  timezone: string,
 ): { startDate: moment.Moment; endDate: moment.Moment } {
   const { day } = options;
   let time = day.clone();
-  const startDate = getUTCFromStartAndEnd(time, event.start);
+  const startDate = getTimezoneFromStartAndEnd(time, event.start, timezone);
 
   let endDate = day.clone();
   time = event.start > event.end ? moment(endDate).add(1, 'days') : endDate;
-  endDate = getUTCFromStartAndEnd(time, event.end);
+  endDate = getTimezoneFromStartAndEnd(time, event.end, timezone);
   return { startDate, endDate };
 }
 
-export const convertWeekToUTC = (event: Weekly): moment.Moment[] => {
+export const convertWeekToTimezone = (event: Weekly, timezone: string): moment.Moment[] => {
   const { start, days } = event;
   return enumerateDaysBetweenDates(moment().startOf('week'), moment().endOf('week'), true, true)
-    .map((el) => getUTCFromStartAndEnd(el.utc(), start))
+    .map((el) => getTimezoneFromStartAndEnd(el, start, timezone))
     .filter((day) => days.includes(DAY_MAP[day.day()]));
 };
 
@@ -127,7 +129,7 @@ export const convertWeekToUTC = (event: Weekly): moment.Moment[] => {
  * @param {ExtractionOption} options - Options used while extracting data from event
  * @return {EventOutput[]}
  */
-export function extractEvents(events: { [id: string]: Weekly | Event }, options?: ExtractionOption): EventOutput[] {
+export function extractEvents(events: { [id: string]: Weekly | Event }, timezone: string, options?: ExtractionOption,): EventOutput[] {
   const eventsCollection: EventOutput[] = [];
   for (const eventId in events) {
     if (events[eventId]) {
@@ -139,8 +141,8 @@ export function extractEvents(events: { [id: string]: Weekly | Event }, options?
           const { start, end } = date;
           eventsCollection.push({
             id: eventId,
-            start: moment.utc(start).toDate(),
-            end: moment.utc(end).toDate(),
+            start: moment.tz(start, DATE_FORMAT, timezone).toDate(),
+            end: moment.tz(end, DATE_FORMAT, timezone).toDate(),
             title: event.name,
             value: event.value,
             color: event.color,
@@ -151,15 +153,16 @@ export function extractEvents(events: { [id: string]: Weekly | Event }, options?
         });
       } else {
         const { dayString } = options;
-        const { startDate, endDate } = getStartAndEndDate(event as Weekly, options);
+        const { startDate, endDate } = getStartAndEndDateTimezone(event as Weekly, options, timezone);
+
         eventsCollection.push({
           id: eventId,
-          start: startDate.toDate(),
-          end: endDate.toDate(),
+          start: moment.tz(startDate, timezone).toDate(),
+          end: moment.tz(endDate, timezone).toDate(),
           title: event.name,
           value: event.value,
           color: event.color,
-          days: convertWeekToUTC(event as Weekly),
+          days: convertWeekToTimezone(event as Weekly, timezone),
           isWeekly: true,
           dayString,
           event: event,

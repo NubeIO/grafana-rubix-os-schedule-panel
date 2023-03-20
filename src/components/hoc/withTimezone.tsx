@@ -10,10 +10,6 @@ export const convertDateTimeToDate = (datetime: string, timezone: string) => {
   return new Date(m.year(), m.month(), m.date(), m.hour(), m.minute(), 0);
 };
 
-export const convertTimezoneFromUtc = (date: string, timezone: string) => {
-  return moment.tz(moment.utc(date), timezone);
-};
-
 export const convertTimeFromTimezone = (dateM: moment.Moment, timezone: string) => {
   return moment
     .tz(
@@ -25,15 +21,14 @@ export const convertTimeFromTimezone = (dateM: moment.Moment, timezone: string) 
         minute: dateM.minute(),
       },
       timezone
-    )
-    .utc();
+    );
 };
 
-export const convertWeekFromTimezoneToUTC = (days: string[], start: string, timezone: string) => {
+export const convertWeekFromTimezone = (days: string[], start: string, timezone: string) => {
   return enumerateDaysBetweenDates(moment().startOf('week'), moment().endOf('week'), true, true)
     .map((el) => getStartAndEndWithTimezone(el, start, timezone))
     .filter((day) => days.includes(DAY_MAP[day.day()]))
-    .map((el) => el.utc().format('dddd').toLowerCase());
+    .map((el) => el.format('dddd').toLowerCase());
 };
 
 interface Props {

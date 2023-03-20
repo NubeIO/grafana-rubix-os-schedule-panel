@@ -12,11 +12,14 @@ interface Props extends PanelProps<PanelOptions> {}
 
 const FLOW_FRAMEWORK_DATASOURCE_ID = 'nubeio-flow-framework-data-source';
 
-export const SimplePanel: React.FC<Props> = ({ options, data, width, height }) => {
+export const SimplePanel: React.FC<Props> = ({ options, data: input, width, height }) => {
 
   const [isDatasourceConfigured, changeIsDatasourceConfigured] = useState(false);
   const [writable] = useState(true);
   const [isRunning, setIsRunning] = useState(false);
+  // @ts-ignore
+  const [value, setValue] = useState(input.series[0].fields[1].values.buffer[0]);
+
   const [dataSource, setDataSource] = useState<any>({});
   const theme = useTheme();
   const palletType = theme.isDark ? 'dark' : 'light';
@@ -24,15 +27,11 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height }) =
   const mainSecondaryColor = theme.isDark ? red[500] : red[900];
 
 
-  // @ts-ignore
-  const value = data.series[0].fields[1].values.buffer[0]
-
   useEffect(() => {
     if (isDatasourceConfigured) {
       return;
     }
-    const datasources = data?.request?.targets.map((x) => x.datasource);
-    console.log(datasources)
+    const datasources = input?.request?.targets.map((x) => x.datasource);
 
     if (Array.isArray(datasources) && datasources.length > 0) {
       datasources.map((datasource) => {
@@ -51,7 +50,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height }) =
           });
       });
     }
-  }, [data]);
+  }, [value]);
 
   const materialTheme = createTheme({
     palette: {
@@ -65,7 +64,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height }) =
     },
   });
 
-  const syncData = (data: RawData) => {
+  const syncData = async (data: RawData) => {
     if (!value) {
       throw new Error('Something went wrong while trying to write to data source.');
     }
@@ -84,10 +83,12 @@ export const SimplePanel: React.FC<Props> = ({ options, data, width, height }) =
     const scheduleService = dataSource?.services?.scheduleService;
 
     if (scheduleService && value) {
-      scheduleService.writeToScheduleId(value.uuid, output)
+      const response = await scheduleService.writeToScheduleId(value.uuid, output)
+      setValue(response);
     } else {
       throw new Error('Something went wrong while trying to write to data source.');
     }
+    setIsRunning(false);
   };
 
   const styles = getStyles();
