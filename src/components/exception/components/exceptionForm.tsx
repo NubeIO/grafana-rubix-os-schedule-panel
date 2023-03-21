@@ -46,7 +46,6 @@ function ExceptionFormUi(props: Props) {
   return (
     <Formik initialValues={initialValues} validationSchema={exceptionFormValidation(options)} onSubmit={onSubmit}>
       {function ({ values, setFieldValue, handleChange, setFieldError, errors, setErrors, touched, isValid }) {
-
         const defaultProps: any = {
           variant: 'outlined',
           size: 'small',
@@ -67,7 +66,8 @@ function ExceptionFormUi(props: Props) {
                   autoCompleteFilter={autoCompleteFilter}
                   onChange={(e: any, value: string) => {
                     setFieldValue('name', value);
-                  }} />
+                  }}
+                />
                 <DateRangeCollection
                   {...defaultProps}
                   inputDates={values.dates}
@@ -82,7 +82,8 @@ function ExceptionFormUi(props: Props) {
                       forceUpdate();
                     }
                   }}
-                  onBlur={() => {}} />
+                  onBlur={() => {}}
+                />
                 <SliderValueField
                   min={options.min}
                   max={options.max}
@@ -92,11 +93,13 @@ function ExceptionFormUi(props: Props) {
                   touched={touched}
                   value={values.value}
                   name="value"
-                  onChange={(e: any, v: any) => setFieldValue('value', v)} />
+                  onChange={(e: any, v: any) => setFieldValue('value', v)}
+                />
                 <ColorSelectorField
                   name="holiday-color-field"
                   value={values.color}
-                  onChange={(color: string) => setFieldValue('color', color)} />
+                  onChange={(color: string) => setFieldValue('color', color)}
+                />
               </form>
             </DialogContent>
             <DialogActions>
@@ -119,7 +122,12 @@ function ExceptionFormUi(props: Props) {
   );
 }
 
-const getInitialFormValues = (isAddForm: boolean | undefined, exception: Exception, defaultValues: any = {}, timezone: string) => {
+const getInitialFormValues = (
+  isAddForm: boolean | undefined,
+  exception: Exception,
+  defaultValues: any = {},
+  timezone: string
+) => {
   if (isAddForm) {
     return {
       id: null,
@@ -164,7 +172,13 @@ interface ExceptionFormProps {
 
 function ExceptionForm(props: ExceptionFormProps) {
   function handleCreateException(values: any, output: RawData) {
-    const newException = exceptionService.getExceptionInstance(null, values.name, values.color, values.dates, values.value);
+    const newException = exceptionService.getExceptionInstance(
+      null,
+      values.name,
+      values.color,
+      values.dates,
+      values.value
+    );
     const updatedData = exceptionService.updateData(newException, output);
     props.syncData(updatedData);
     props.closeGenericDialog();
@@ -191,13 +205,23 @@ function ExceptionForm(props: ExceptionFormProps) {
     handleUpdateException(props.exception.id, values, output);
   }
 
-  const initialFormValues = getInitialFormValues(props.isAddForm, props.exception, {
-    name: props.defaultScheduleName,
-    value: props.options.default || props.options.min,
-  }, props.options.timezone);
+  const initialFormValues = getInitialFormValues(
+    props.isAddForm,
+    props.exception,
+    {
+      name: props.defaultScheduleName,
+      value: props.options.default || props.options.min,
+    },
+    props.options.timezone
+  );
 
   return (
-    <ExceptionFormUi {...props} onSubmit={onSubmit} onDelete={handleDeleteException} initialValues={initialFormValues} />
+    <ExceptionFormUi
+      {...props}
+      onSubmit={onSubmit}
+      onDelete={handleDeleteException}
+      initialValues={initialFormValues}
+    />
   );
 }
 

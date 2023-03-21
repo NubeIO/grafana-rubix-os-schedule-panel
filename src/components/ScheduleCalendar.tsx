@@ -9,7 +9,6 @@ import { Calendar, momentLocalizer } from 'react-big-calendar';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { makeStyles, ThemeProvider, createTheme } from '@material-ui/core/styles';
 
-
 import EventModal from './EventModal';
 import CustomEvent from './CustomEvent';
 import withTimeZone from './hoc/withTimezone';
@@ -19,8 +18,6 @@ import withScheduleNames from './hoc/withScheduleNames';
 import withCalendarExceptions from './hoc/withCalendarExceptions';
 import { DAY_MAP, extractEvents, getDaysArrayByMonth } from '../utils';
 import { EventOutput, Event, Weekly, PanelOptions, Operation, RawData } from '../types';
-
-
 
 interface Props {
   value: any;
@@ -44,18 +41,17 @@ function AppContainer(props: any) {
 
 function ScheduleCalendar(props: Props) {
   const { value, options, isRunning, setIsRunning, syncData, openGenericDialog = (f: any) => f } = props;
-  console.log("props", value)
 
   const classes = useStyles();
   const theme = useTheme();
   if (theme.isDark) {
-    require('./ScheduleCalendarDark.scss')
+    require('./ScheduleCalendarDark.scss');
   } else {
-    require('./ScheduleCalendarLight.scss')
+    require('./ScheduleCalendarLight.scss');
   }
 
   const staticLocalizer = momentLocalizer(moment);
-  const timezone = options.timezone || "UTC";
+  const timezone = options.timezone || 'UTC';
 
   const [eventCollection, setEventCollection] = useState<EventOutput[]>([]);
   const [visibleDate, setVisibleDate] = useState(moment());
@@ -69,7 +65,11 @@ function ScheduleCalendar(props: Props) {
   }, [value, visibleDate]);
 
   const updateEvents = () => {
-    const { schedule: { schedules: { events = {}, weekly = {}, exception = {} } } } = value || {};
+    const {
+      schedule: {
+        schedules: { events = {}, weekly = {}, exception = {} },
+      },
+    } = value || {};
     let eventsCollection: EventOutput[] = [];
 
     const isolatedEvents = extractEvents(events, timezone);
@@ -147,7 +147,7 @@ function ScheduleCalendar(props: Props) {
 
   const handleModalSubmit = (event: Weekly | Event, id: string) => {
     let output: RawData = { events: {}, weekly: {}, exception: {} };
-    console.log(output, value)
+
     try {
       output = { events: { ...value.events }, weekly: { ...value.weekly }, exception: { ...value.exception } };
     } catch (e) {}
@@ -156,8 +156,7 @@ function ScheduleCalendar(props: Props) {
     } else {
       output.events[id] = event;
     }
-    console.log("final ", output)
-    // syncOnServer(output);
+    syncOnServer(output);
   };
 
   const handleModalDelete = (id: string) => {
@@ -188,13 +187,10 @@ function ScheduleCalendar(props: Props) {
     };
   };
 
-
   return (
     <>
       <ToolbarButtonRow>
-        <ToolbarButton
-          variant="default"
-          disabled>
+        <ToolbarButton variant="default" disabled>
           {timezone}
         </ToolbarButton>
         <div className={classes.blankSpace} />
@@ -202,19 +198,25 @@ function ScheduleCalendar(props: Props) {
           variant="default"
           icon="plus-circle"
           onClick={() => openGenericDialog(DIALOG_NAMES.exceptionDialog, { isAddForm: true })}
-        >Exception</ToolbarButton>
+        >
+          Exception
+        </ToolbarButton>
         <ToolbarButton
           variant="default"
           icon="plus-circle"
           onClick={() => addEvent(true)}
           disabled={options.disableWeeklyEvent}
-        >Weekly Event</ToolbarButton>
+        >
+          Weekly Event
+        </ToolbarButton>
         <ToolbarButton
           variant="default"
           icon="plus-circle"
           onClick={() => addEvent(false)}
           disabled={options.disableEvent}
-        >Event</ToolbarButton>
+        >
+          Event
+        </ToolbarButton>
       </ToolbarButtonRow>
       <div className={classes.calendar}>
         <CalendarHOC
@@ -279,14 +281,14 @@ const useStyles = makeStyles({
     position: 'absolute',
   },
   titleWrapper: {
-    position: "absolute",
-    left: '50%'
+    position: 'absolute',
+    left: '50%',
   },
   titleLabel: {
-    position: "relative",
-    left: "-50%",
-    fontWeight: 500
-  }
+    position: 'relative',
+    left: '-50%',
+    fontWeight: 500,
+  },
 });
 
 const ScheduleCalendarHoc = flowRight(withScheduleNames, withGenericDialog)(ScheduleCalendar);
@@ -300,40 +302,42 @@ export default function ScheduleCalendarCom(props: any) {
 }
 
 const HeaderCellContent: React.FC<any> = (props: any) => {
-  const { localizer: { messages }, label, views, view, onView, onNavigate } = props;
+  const {
+    localizer: { messages },
+    label,
+    views,
+    view,
+    onView,
+    onNavigate,
+  } = props;
   const classes = useStyles();
 
   return (
     <div>
-      <div className={classes.titleWrapper} >
+      <div className={classes.titleWrapper}>
         <span className={classes.titleLabel}>{label}</span>
       </div>
       <div className={classes.toolbar}>
         <ButtonGroup>
-          <ToolbarButton
-            variant="default" onClick={() => onNavigate('TODAY')}
-          >
+          <ToolbarButton variant="default" onClick={() => onNavigate('TODAY')}>
             {messages.today}
           </ToolbarButton>
-          <ToolbarButton
-            variant="default"
-            onClick={() => onNavigate('PREV')}
-          >
+          <ToolbarButton variant="default" onClick={() => onNavigate('PREV')}>
             {messages.previous}
           </ToolbarButton>
-          <ToolbarButton
-            variant="default" onClick={() => onNavigate('NEXT')}
-          >
+          <ToolbarButton variant="default" onClick={() => onNavigate('NEXT')}>
             {messages.next}
           </ToolbarButton>
         </ButtonGroup>
         <div className={classes.blankSpace} />
         <RadioButtonGroup
-          options={views.map((name: string) => { return { label: messages[name], value: name } })}
+          options={views.map((name: string) => {
+            return { label: messages[name], value: name };
+          })}
           value={view}
           onChange={(v) => onView(v!)}
         />
-      </div >
+      </div>
     </div>
   );
 };

@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { DataFrame, Field, PanelProps } from '@grafana/data';
+import React, { useEffect, useState } from 'react';
+import { PanelProps } from '@grafana/data';
 import { PanelOptions, RawData } from 'types';
 import { css, cx } from 'emotion';
 import { stylesFactory, useTheme } from '@grafana/ui';
@@ -13,7 +13,6 @@ interface Props extends PanelProps<PanelOptions> {}
 const FLOW_FRAMEWORK_DATASOURCE_ID = 'nubeio-flow-framework-data-source';
 
 export const SimplePanel: React.FC<Props> = ({ options, data: input, width, height }) => {
-
   const [isDatasourceConfigured, changeIsDatasourceConfigured] = useState(false);
   const [writable] = useState(true);
   const [isRunning, setIsRunning] = useState(false);
@@ -25,7 +24,6 @@ export const SimplePanel: React.FC<Props> = ({ options, data: input, width, heig
   const palletType = theme.isDark ? 'dark' : 'light';
   const mainPrimaryColor = theme.isDark ? blue[500] : blue[900];
   const mainSecondaryColor = theme.isDark ? red[500] : red[900];
-
 
   useEffect(() => {
     if (isDatasourceConfigured) {
@@ -78,12 +76,12 @@ export const SimplePanel: React.FC<Props> = ({ options, data: input, width, heig
     setIsRunning(true);
 
     const output = {
-      schedule: { schedules: schedules }
-    }
+      schedule: { schedules: schedules },
+    };
     const scheduleService = dataSource?.services?.scheduleService;
 
     if (scheduleService && value) {
-      const response = await scheduleService.writeToScheduleId(value.uuid, output)
+      const response = await scheduleService.writeToScheduleId(value.uuid, output);
       setValue(response);
     } else {
       throw new Error('Something went wrong while trying to write to data source.');

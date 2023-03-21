@@ -124,10 +124,10 @@ const getEditEventInitialValues = (
     name: event.name,
     dates:
       eventOutput?.dates?.map(function (date) {
-        return ({
+        return {
           start: moment.tz(date.start, DATE_FORMAT, timezone).format(DATE_FORMAT),
           end: moment.tz(date.end, DATE_FORMAT, timezone).format(DATE_FORMAT),
-        });
+        };
       }) || [],
     value: event.value,
     color: event.color,

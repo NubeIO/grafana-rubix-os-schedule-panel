@@ -11,17 +11,16 @@ export const convertDateTimeToDate = (datetime: string, timezone: string) => {
 };
 
 export const convertTimeFromTimezone = (dateM: moment.Moment, timezone: string) => {
-  return moment
-    .tz(
-      {
-        year: dateM.year(),
-        month: dateM.month(),
-        date: dateM.date(),
-        hour: dateM.hour(),
-        minute: dateM.minute(),
-      },
-      timezone
-    );
+  return moment.tz(
+    {
+      year: dateM.year(),
+      month: dateM.month(),
+      date: dateM.date(),
+      hour: dateM.hour(),
+      minute: dateM.minute(),
+    },
+    timezone
+  );
 };
 
 export const convertWeekFromTimezone = (days: string[], start: string, timezone: string) => {

@@ -104,7 +104,7 @@ export function getTimezoneFromStartAndEnd(baseDate: moment.Moment, time: string
 function getStartAndEndDateTimezone(
   event: Weekly,
   options: ExtractionOption,
-  timezone: string,
+  timezone: string
 ): { startDate: moment.Moment; endDate: moment.Moment } {
   const { day } = options;
   let time = day.clone();
@@ -129,7 +129,12 @@ export const convertWeekToTimezone = (event: Weekly, timezone: string): moment.M
  * @param {ExtractionOption} options - Options used while extracting data from event
  * @return {EventOutput[]}
  */
-export function extractEvents(events: { [id: string]: Weekly | Event }, timezone: string, isHoliday: boolean = false, options?: ExtractionOption,): EventOutput[] {
+export function extractEvents(
+  events: { [id: string]: Weekly | Event },
+  timezone: string,
+  isHoliday = false,
+  options?: ExtractionOption
+): EventOutput[] {
   const eventsCollection: EventOutput[] = [];
   for (const eventId in events) {
     if (events[eventId]) {
