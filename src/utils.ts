@@ -129,7 +129,7 @@ export const convertWeekToTimezone = (event: Weekly, timezone: string): moment.M
  * @param {ExtractionOption} options - Options used while extracting data from event
  * @return {EventOutput[]}
  */
-export function extractEvents(events: { [id: string]: Weekly | Event }, timezone: string, options?: ExtractionOption,): EventOutput[] {
+export function extractEvents(events: { [id: string]: Weekly | Event }, timezone: string, isHoliday: boolean = false, options?: ExtractionOption,): EventOutput[] {
   const eventsCollection: EventOutput[] = [];
   for (const eventId in events) {
     if (events[eventId]) {
@@ -147,6 +147,7 @@ export function extractEvents(events: { [id: string]: Weekly | Event }, timezone
             value: event.value,
             color: event.color,
             isWeekly: false,
+            isHoliday: isHoliday,
             event: event,
             backupEvent: event,
           });

@@ -1,6 +1,6 @@
 import React from 'react';
 import { EventOutput, RawData } from 'types';
-import * as holidayService from 'components/holiday/holiday.service';
+import * as exceptionService from 'components/exception/exception.service';
 
 interface Props {
   events: EventOutput[];
@@ -14,16 +14,16 @@ interface Props {
   localizer: any;
   components: any;
   defaultView: string;
-  date: string;
+  dates: string;
 }
 
-function withCalendarHolidays(ComposedComponent: any) {
+function withCalendarExceptions(ComposedComponent: any) {
   // eslint-disable-next-line react/display-name
   return (props: Props) => {
-    const holidays = holidayService.getHolidayEvents(props?.value?.holiday, props.date, props.timezone);
+    const exceptions = exceptionService.getExceptionEvents(props?.value?.exception, props.dates, props.timezone);
 
-    return <ComposedComponent {...props} events={[...props.events, ...holidays]} />;
+    return <ComposedComponent {...props} events={[...props.events, ...exceptions]} />;
   };
 }
 
-export default withCalendarHolidays;
+export default withCalendarExceptions;

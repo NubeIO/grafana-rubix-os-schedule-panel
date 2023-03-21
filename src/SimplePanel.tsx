@@ -72,7 +72,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data: input, width, heig
     const schedules = {
       events: { ...oldSchedules.events, ...data.events },
       weekly: { ...oldSchedules.weekly, ...data.weekly },
-      holiday: { ...oldSchedules.holiday, ...data.holiday },
+      exception: { ...data.exception },
     };
 
     setIsRunning(true);

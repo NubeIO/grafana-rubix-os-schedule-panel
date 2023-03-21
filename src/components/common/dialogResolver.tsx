@@ -1,19 +1,19 @@
 import { DIALOG_NAMES } from '../../constants/dialogNames';
-import HolidayDialogForm from '../holiday/components/holidayForm';
+import ExceptionDialogForm from '../exception/components/exceptionForm';
 
 const dialogs = {
-  [DIALOG_NAMES.holidayDialog]: {
-    title: 'Add Holiday',
+  [DIALOG_NAMES.exceptionDialog]: {
+    title: 'Add Exception',
     size: 'xl',
-    name: DIALOG_NAMES.holidayDialog,
-    dialogBody: HolidayDialogForm,
+    name: DIALOG_NAMES.exceptionDialog,
+    dialogBody: ExceptionDialogForm,
     isAddForm: true,
   },
-  [DIALOG_NAMES.editHolidayDialog]: {
-    title: 'Edit Holiday',
+  [DIALOG_NAMES.editExceptionDialog]: {
+    title: 'Edit Exception',
     size: 'xl',
-    name: DIALOG_NAMES.holidayDialog,
-    dialogBody: HolidayDialogForm,
+    name: DIALOG_NAMES.exceptionDialog,
+    dialogBody: ExceptionDialogForm,
     isAddForm: false,
   },
 };

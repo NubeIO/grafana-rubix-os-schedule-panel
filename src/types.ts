@@ -34,20 +34,18 @@ export interface Weekly {
   end: string; // 2:00
 }
 
-export interface HolidayPayload {
+export interface ExceptionPayload {
   title: string;
   month: string | number;
   day: string | number;
 }
 
-export interface HolidayEvent {
-  color: string;
-  title: string;
-  start: number;
-  end: number;
-  date: string;
-  isHoliday: boolean;
+export interface ExceptionEvent {
   id: string;
+  name: string;
+  value: number | string;
+  color: string;
+  dates: EventDate[];
 }
 
 export interface Event {
@@ -82,5 +80,5 @@ export interface EventOutput {
 export interface RawData {
   events: any;
   weekly: any;
-  holiday: any;
+  exception: any;
 }

@@ -16,8 +16,7 @@ import withTimeZone from './hoc/withTimezone';
 import { DIALOG_NAMES } from '../constants/dialogNames';
 import withGenericDialog from './hoc/withGenericDialog';
 import withScheduleNames from './hoc/withScheduleNames';
-import TimezoneToggle from './renderProps/TimezoneToggle';
-import withCalendarHolidays from './hoc/withCalendarHolidays';
+import withCalendarExceptions from './hoc/withCalendarExceptions';
 import { DAY_MAP, extractEvents, getDaysArrayByMonth } from '../utils';
 import { EventOutput, Event, Weekly, PanelOptions, Operation, RawData } from '../types';
 
@@ -33,7 +32,7 @@ interface Props {
   scheduleNames: string[];
 }
 
-const CalendarHOC = flowRight(withTimeZone, withCalendarHolidays)(Calendar);
+const CalendarHOC = flowRight(withTimeZone, withCalendarExceptions)(Calendar);
 
 function AppContainer(props: any) {
   return (
@@ -45,6 +44,7 @@ function AppContainer(props: any) {
 
 function ScheduleCalendar(props: Props) {
   const { value, options, isRunning, setIsRunning, syncData, openGenericDialog = (f: any) => f } = props;
+  console.log("props", value)
 
   const classes = useStyles();
   const theme = useTheme();
@@ -69,10 +69,11 @@ function ScheduleCalendar(props: Props) {
   }, [value, visibleDate]);
 
   const updateEvents = () => {
-    const { schedule: { schedules: { events = {}, weekly = {} } } } = value || {};
+    const { schedule: { schedules: { events = {}, weekly = {}, exception = {} } } } = value || {};
     let eventsCollection: EventOutput[] = [];
 
     const isolatedEvents = extractEvents(events, timezone);
+    const exceptionEvents = extractEvents(exception, timezone, true);
 
     const days = getDaysArrayByMonth(visibleDate);
 
@@ -97,14 +98,14 @@ function ScheduleCalendar(props: Props) {
       const dayString = DAY_MAP[dayNumeric];
       const dayEventsMap = dayEventMap[dayString];
       if (dayEventsMap) {
-        const dayEvents = extractEvents(dayEventsMap, timezone, {
+        const dayEvents = extractEvents(dayEventsMap, timezone, false, {
           day,
           dayString,
         });
         dayEventsCollection.push(dayEvents);
       }
     }
-    eventsCollection = eventsCollection.concat(isolatedEvents, ...dayEventsCollection);
+    eventsCollection = eventsCollection.concat(isolatedEvents, exceptionEvents, ...dayEventsCollection);
     setEventCollection(eventsCollection);
 
     if (!options.hasPayload) {
@@ -131,7 +132,7 @@ function ScheduleCalendar(props: Props) {
 
   const onSelectEvent = (eventOutput: EventOutput) => {
     if (eventOutput.isHoliday) {
-      return openGenericDialog(DIALOG_NAMES.editHolidayDialog, { holiday: eventOutput });
+      return openGenericDialog(DIALOG_NAMES.editExceptionDialog, { exception: eventOutput });
     }
     setOperation('edit');
     setIsWeekly(eventOutput.isWeekly);
@@ -145,16 +146,18 @@ function ScheduleCalendar(props: Props) {
   };
 
   const handleModalSubmit = (event: Weekly | Event, id: string) => {
-    let output: RawData = { events: {}, weekly: {}, holiday: {} };
+    let output: RawData = { events: {}, weekly: {}, exception: {} };
+    console.log(output, value)
     try {
-      output = { events: { ...value.events }, weekly: { ...value.weekly }, holiday: { ...value.holiday } };
+      output = { events: { ...value.events }, weekly: { ...value.weekly }, exception: { ...value.exception } };
     } catch (e) {}
     if (isWeekly) {
       output.weekly[id] = event;
     } else {
       output.events[id] = event;
     }
-    syncOnServer(output);
+    console.log("final ", output)
+    // syncOnServer(output);
   };
 
   const handleModalDelete = (id: string) => {
@@ -198,8 +201,8 @@ function ScheduleCalendar(props: Props) {
         <ToolbarButton
           variant="default"
           icon="plus-circle"
-          onClick={() => openGenericDialog(DIALOG_NAMES.holidayDialog, { isAddForm: true })}
-        >Holiday</ToolbarButton>
+          onClick={() => openGenericDialog(DIALOG_NAMES.exceptionDialog, { isAddForm: true })}
+        >Exception</ToolbarButton>
         <ToolbarButton
           variant="default"
           icon="plus-circle"
