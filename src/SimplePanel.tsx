@@ -27,6 +27,8 @@ export const SimplePanel: React.FC<Props> = ({ options, data: input, width, heig
 
   useEffect(() => {
     if (isDatasourceConfigured) {
+      // @ts-ignore
+      setValue(input.series[0].fields[1].values.buffer[0]);
       return;
     }
     const datasources = input?.request?.targets.map((x) => x.datasource);
@@ -48,7 +50,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data: input, width, heig
           });
       });
     }
-  }, [value]);
+  }, [input]);
 
   const materialTheme = createTheme({
     palette: {

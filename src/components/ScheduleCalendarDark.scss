@@ -1,7 +1,7 @@
 $border-color: rgb(44, 50, 53);
 $calendar-border: rgb(44, 50, 53);
-$cell-border: rgb(44, 50, 53);
-$today-highlight-bg: rgb(51, 162, 229);
+$cell-border: rgba(44, 50, 53, .2);
+$today-highlight-bg: rgba(49,115,216, .5);
 $time-selection-color: rgb(123, 128, 135);
 
 @import 'react-big-calendar/lib/sass/styles';
