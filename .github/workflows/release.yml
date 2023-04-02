@@ -1,164 +1,133 @@
-name: Release
+name: release-build
 
 on:
   push:
-    tags:
-      - "v*.*.*" # Run workflow on version tags, e.g. v1.0.0.
+    branches: [ master ]
+    tags: [ 'v*' ]
+    paths-ignore:
+      - '.github/ISSUE_TEMPLATE/**'
+      - '.github/*.yml'
+      - '*.md'
+      - 'LICENSE'
+  pull_request:
+    types: [ opened, synchronize, reopened, closed ]
+    branches: [ master ]
+
+env:
+  NODE_VERSION: 14
+  CURRENT_REPO: grafana-flow-framework-schedule-panel
 
 jobs:
-  release:
+  context:
     runs-on: ubuntu-latest
+    outputs:
+      branch: ${{ steps.context.outputs.branch }}
+      fqn: ${{ steps.fqn.outputs.fqn }}
+      shouldBuild: ${{ steps.context.outputs.decision_build }}
+      isRelease: ${{ steps.context.outputs.isTag }}
+      version: ${{ steps.context.outputs.version }}
 
     steps:
       - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.NUBEIO_CI_GITHUB_COMMITER_PAT }}
 
-      - name: Setup Node.js environment
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v3
+        with:
+          git-user-signingkey: true
+          git-commit-gpgsign: true
+          git-tag-gpgsign: true
+          git-push-gpgsign: false
+          gpg-private-key: ${{ secrets.NUBEIO_CI_GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.NUBEIO_CI_GPG_PASSPHARSE }}
+
+      - name: Project context
+        id: context
+        uses: zero88/gh-project-context@v1
+        with:
+          dry: false
+          defaultBranch: master
+          mustSign: true
+
+      - name: Project name
+        id: fqn
+        run: |
+          echo ::set-output name=fqn::$(jq -r .name < package.json)-${{ steps.context.outputs.version }}-${{ steps.context.outputs.shortCommitId }}
+  build:
+    runs-on: ubuntu-latest
+    needs: context
+    if: needs.context.outputs.shouldBuild == 'true'
+    steps:
+      - name: Install Node.js
         uses: actions/setup-node@v2.1.2
         with:
-          node-version: "14.x"
+          node-version: ${{ env.NODE_VERSION }}
 
-      - name: Setup Go environment
-        uses: actions/setup-go@v2
+      - uses: actions/checkout@v2
+
+      - uses: actions/cache@v2
+        id: cache_yarn
         with:
-          go-version: "1.15"
-
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-
-      - name: Cache yarn cache
-        uses: actions/cache@v2
-        id: cache-yarn-cache
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          path: '**/node_modules'
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
 
-      - name: Cache node_modules
-        id: cache-node-modules
-        uses: actions/cache@v2
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-${{ matrix.node-version }}-nodemodules-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ matrix.node-version }}-nodemodules-
+      - name: YARN install
+        if: steps.cache_yarn.outputs.cache-hit != 'true'
+        run: yarn install
 
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile;
-        if: |
-          steps.cache-yarn-cache.outputs.cache-hit != 'true' ||
-          steps.cache-node-modules.outputs.cache-hit != 'true'
-
-      - name: Build and test frontend
+      - name: YARN build
         run: yarn build
 
-      - name: Check for backend
-        id: check-for-backend
-        run: |
-          if [ -f "Magefile.go" ]
-          then
-            echo "::set-output name=has-backend::true"
-          fi
+      - name: Zip artifact
+        run: cd dist && zip -rv ../${{ needs.context.outputs.fqn }}.zip . && cd -
 
-      - name: Test backend
-        if: steps.check-for-backend.outputs.has-backend == 'true'
-        uses: magefile/mage-action@v1
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
         with:
-          version: latest
-          args: coverage
+          name: ${{ needs.context.outputs.fqn }}
+          path: ${{ needs.context.outputs.fqn }}.zip
+          if-no-files-found: 'error'
+          retention-days: 1
 
-      - name: Build backend
-        if: steps.check-for-backend.outputs.has-backend == 'true'
-        uses: magefile/mage-action@v1
+  release:
+    runs-on: ubuntu-latest
+    needs: [ context, build ]
+    if: needs.context.outputs.isRelease == 'true'
+    steps:
+      - uses: actions/download-artifact@v2
         with:
-          version: latest
-          args: buildAll
-
-      - name: Sign plugin
-        run: yarn sign
-        env:
-          GRAFANA_API_KEY: ${{ secrets.GRAFANA_API_KEY }} # Requires a Grafana API key from Grafana.com.
-
-      - name: Get plugin metadata
-        id: metadata
-        run: |
-          sudo apt-get install jq
-
-          export GRAFANA_PLUGIN_ID=$(cat dist/plugin.json | jq -r .id)
-          export GRAFANA_PLUGIN_VERSION=$(cat dist/plugin.json | jq -r .info.version)
-          export GRAFANA_PLUGIN_TYPE=$(cat dist/plugin.json | jq -r .type)
-          export GRAFANA_PLUGIN_ARTIFACT=${GRAFANA_PLUGIN_ID}-${GRAFANA_PLUGIN_VERSION}.zip
-          export GRAFANA_PLUGIN_ARTIFACT_CHECKSUM=${GRAFANA_PLUGIN_ARTIFACT}.md5
-
-          echo "::set-output name=plugin-id::${GRAFANA_PLUGIN_ID}"
-          echo "::set-output name=plugin-version::${GRAFANA_PLUGIN_VERSION}"
-          echo "::set-output name=plugin-type::${GRAFANA_PLUGIN_TYPE}"
-          echo "::set-output name=archive::${GRAFANA_PLUGIN_ARTIFACT}"
-          echo "::set-output name=archive-checksum::${GRAFANA_PLUGIN_ARTIFACT_CHECKSUM}"
-
-          echo ::set-output name=github-tag::${GITHUB_REF#refs/*/}
-
-      - name: Read changelog
-        id: changelog
-        run: |
-          awk '/^## / {s++} s == 1 {print}' CHANGELOG.md > release_notes.md
-          echo "::set-output name=path::release_notes.md"
-
-      - name: Check package version
-        run: if [ "v${{ steps.metadata.outputs.plugin-version }}" != "${{ steps.metadata.outputs.github-tag }}" ]; then printf "\033[0;31mPlugin version doesn't match tag name\033[0m\n"; exit 1; fi
-
-      - name: Package plugin
-        id: package-plugin
-        run: |
-          mv dist ${{ steps.metadata.outputs.plugin-id }}
-          zip ${{ steps.metadata.outputs.archive }} ${{ steps.metadata.outputs.plugin-id }} -r
-          md5sum ${{ steps.metadata.outputs.archive }} > ${{ steps.metadata.outputs.archive-checksum }}
-          echo "::set-output name=checksum::$(cat ./${{ steps.metadata.outputs.archive-checksum }} | cut -d' ' -f1)"
-
-      - name: Lint plugin
-        run: |
-          git clone https://github.com/grafana/plugin-validator
-          pushd ./plugin-validator/cmd/plugincheck
-          go install
-          popd
-          plugincheck ${{ steps.metadata.outputs.archive }}
-
-      - name: Create release
-        id: create_release
-        uses: actions/create-release@v1
+          name: ${{ needs.context.outputs.fqn }}
+          path: ./
+      - name: Create Release
+        id: createRelease
+        uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          body_path: ${{ steps.changelog.outputs.path }}
-          draft: true
-
-      - name: Add plugin to release
-        id: upload-plugin-asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./${{ steps.metadata.outputs.archive }}
-          asset_name: ${{ steps.metadata.outputs.archive }}
-          asset_content_type: application/zip
-
-      - name: Add checksum to release
-        id: upload-checksum-asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./${{ steps.metadata.outputs.archive-checksum }}
-          asset_name: ${{ steps.metadata.outputs.archive-checksum }}
-          asset_content_type: text/plain
-
-      - name: Publish to Grafana.com
+          tag_name: v${{ needs.context.outputs.version }}
+          name: Release v${{ needs.context.outputs.version }}
+          draft: false
+          prerelease: false
+          files: |
+            ./${{ needs.context.outputs.fqn }}.zip
+  distribute:
+    runs-on: ubuntu-latest
+    needs: [ context, build ]
+    if: needs.context.outputs.isRelease == 'true'
+    steps:
+      - name: Create PR in grafana-docker
         run: |
-          echo A draft release has been created for your plugin. Please review and publish it. Then submit your plugin to grafana.com/plugins by opening a PR to https://github.com/grafana/grafana-plugin-repository with the following entry:
-          echo
-          echo '{ "id": "${{ steps.metadata.outputs.plugin-id }}", "type": "${{ steps.metadata.outputs.plugin-type }}", "url": "https://github.com/${{ github.repository }}", "versions": [ { "version": "${{ steps.metadata.outputs.plugin-version }}", "commit": "${{ github.sha }}", "url": "https://github.com/${{ github.repository }}", "download": { "any": { "url": "https://github.com/${{ github.repository }}/releases/download/v${{ steps.metadata.outputs.plugin-version }}/${{ steps.metadata.outputs.archive }}", "md5": "${{ steps.package-plugin.outputs.checksum }}" } } } ] }' | jq .
+          workflow=create-pr-when-released-plugin.yml
+          secret="${{ secrets.NUBEIO_CI_GITHUB_WORKFLOWS_PAT }}"
+          name="${{ env.CURRENT_REPO }}"
+          version="v${{ needs.context.outputs.version }}"
+          archive="${{ needs.context.outputs.fqn }}.zip"
+          data="{\"ref\":\"main\",\"inputs\":{\"name\":\"$name\",\"version\":\"$version\",\"archive\":\"$archive\"}}"
+          status=$(curl -X POST \
+                      -H "Accept: application/vnd.github.v3+json" \
+                      -H "Authorization: Bearer $secret" \
+                      -d "$data" -w "%{http_code}\n" -o out.json \
+                      https://api.github.com/repos/nubeio/grafana-docker/actions/workflows/$workflow/dispatches)
+          cat out.json
+          [[ "$status" =~ ^2[[:digit:]][[:digit:]] ]] || exit 1

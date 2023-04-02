@@ -1,5 +1,5 @@
-# Changelog
+# CHANGELOG
 
-## 1.0.0 (Unreleased)
+## [v1.0.0](https://github.com/NubeIO/grafana-flow-framework-schedule-panel/tree/v1.0.0) (2022-04-02)
 
-Initial release.
+- Schedule first release
