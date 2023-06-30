@@ -65,11 +65,10 @@ function ScheduleCalendar(props: Props) {
   }, [value, visibleDate]);
 
   const updateEvents = () => {
-    const {
-      schedule: {
-        schedules: { events = {}, weekly = {}, exception = {} },
-      },
-    } = value || {};
+    const { schedule } = value || {};
+    const { schedules } = schedule || {};
+    const { events = {}, weekly = {}, exception = {} } = schedules || {};
+
     let eventsCollection: EventOutput[] = [];
 
     const isolatedEvents = extractEvents(events, timezone);
