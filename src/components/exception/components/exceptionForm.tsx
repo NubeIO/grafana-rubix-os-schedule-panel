@@ -4,7 +4,7 @@ import _cloneDeep from 'lodash/cloneDeep';
 import Button from '@material-ui/core/Button';
 import DialogTitle from '@material-ui/core/DialogTitle';
 
-import { PanelOptions, RawData } from 'types';
+import { InputData, PanelOptions, RawData } from 'types';
 import { Exception } from 'components/exception/exception.model';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -18,6 +18,7 @@ import AutoCompleteSelectField from 'components/common/autoCompleteSearchField';
 import { DATE_FORMAT } from 'components/EventModal';
 import moment from 'moment-timezone';
 import DateRangeCollection from 'components/DateRangeCollection';
+import { defaultSchedule } from 'components/ScheduleCalendar';
 
 interface Props {
   id: string;
@@ -154,7 +155,7 @@ const getInitialFormValues = (
 
 interface ExceptionFormProps {
   syncData: any;
-  value: RawData;
+  value: InputData;
   closeGenericDialog: () => void;
   isAddForm: boolean | undefined;
   exception: Exception;
@@ -192,13 +193,16 @@ function ExceptionForm(props: ExceptionFormProps) {
   }
 
   function handleDeleteException() {
-    delete props.value.exception[props.exception.id];
-    props.syncData(props.value);
+    const value = props.value;
+    const output: RawData = _cloneDeep(value?.schedule?.schedules || defaultSchedule) || defaultSchedule;
+    delete output.exception[props.exception.id];
+    props.syncData(output);
     props.closeGenericDialog();
   }
 
   function onSubmit(values: Exception) {
-    let output: RawData = _cloneDeep(props.value) || {};
+    const value = props.value;
+    const output: RawData = _cloneDeep(value?.schedule?.schedules || defaultSchedule) || defaultSchedule;
     if (props.isAddForm) {
       return handleCreateException(values, output);
     }

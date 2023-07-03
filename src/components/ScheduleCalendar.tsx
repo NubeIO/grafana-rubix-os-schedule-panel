@@ -29,6 +29,8 @@ interface Props {
   scheduleNames: string[];
 }
 
+export const defaultSchedule = { events: {}, weekly: {}, exception: {} };
+
 const CalendarHOC = flowRight(withTimeZone, withCalendarExceptions)(Calendar);
 
 function AppContainer(props: any) {
@@ -145,11 +147,8 @@ function ScheduleCalendar(props: Props) {
   };
 
   const handleModalSubmit = (event: Weekly | Event, id: string) => {
-    let output: RawData = { events: {}, weekly: {}, exception: {} };
+    const output: RawData = _cloneDeep(value?.schedule?.schedules || defaultSchedule) || defaultSchedule;
 
-    try {
-      output = { events: { ...value.events }, weekly: { ...value.weekly }, exception: { ...value.exception } };
-    } catch (e) {}
     if (isWeekly) {
       output.weekly[id] = event;
     } else {
@@ -159,12 +158,14 @@ function ScheduleCalendar(props: Props) {
   };
 
   const handleModalDelete = (id: string) => {
-    const output: RawData = _cloneDeep(value) || {};
+    const output: RawData = _cloneDeep(value?.schedule?.schedules || defaultSchedule) || defaultSchedule;
+
     if (isWeekly) {
       delete output.weekly[id];
     } else {
       delete output.events[id];
     }
+
     syncOnServer(output);
   };
 

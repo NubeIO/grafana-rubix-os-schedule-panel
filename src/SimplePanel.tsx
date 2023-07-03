@@ -68,10 +68,9 @@ export const SimplePanel: React.FC<Props> = ({ options, data: input, width, heig
     if (!value) {
       throw new Error('Something went wrong while trying to write to data source.');
     }
-    const oldSchedules = value.schedule?.schedules || {};
     const schedules = {
-      events: { ...oldSchedules.events, ...data.events },
-      weekly: { ...oldSchedules.weekly, ...data.weekly },
+      events: { ...data.events },
+      weekly: { ...data.weekly },
       exception: { ...data.exception },
     };
 
@@ -84,7 +83,7 @@ export const SimplePanel: React.FC<Props> = ({ options, data: input, width, heig
 
     if (scheduleService && value) {
       const response = await scheduleService.writeToScheduleId(value.uuid, value.host_uuid, output);
-      setValue(response);
+      setValue({ ...response, host_uuid: value.host_uuid });
     } else {
       throw new Error('Something went wrong while trying to write to data source.');
     }
