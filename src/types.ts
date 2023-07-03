@@ -82,3 +82,16 @@ export interface RawData {
   weekly: any;
   exception: any;
 }
+
+export interface InputData {
+  schedule: {
+    schedules: {
+      events: any;
+      weekly: any;
+      exception: any;
+    };
+  };
+}
+export interface DataFieldKeyI {
+  [key: string]: string;
+}

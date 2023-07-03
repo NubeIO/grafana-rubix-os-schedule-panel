@@ -7,17 +7,18 @@ import ScheduleCalendar from './components/ScheduleCalendar';
 import { createTheme, ThemeProvider } from '@material-ui/core';
 import { blue, red } from '@material-ui/core/colors';
 import { getDataSourceSrv } from '@grafana/runtime';
+import * as writerUiService from './services/writerUiService';
 
 interface Props extends PanelProps<PanelOptions> {}
 
-const FLOW_FRAMEWORK_DATASOURCE_ID = 'nubeio-flow-framework-data-source';
+const RUBIX_FRAMEWORK_DATASOURCE_ID = 'grafana-rubix-os-data-source';
 
 export const SimplePanel: React.FC<Props> = ({ options, data: input, width, height }) => {
   const [isDatasourceConfigured, changeIsDatasourceConfigured] = useState(false);
   const [writable] = useState(true);
   const [isRunning, setIsRunning] = useState(false);
-  // @ts-ignore
-  const [value, setValue] = useState(input.series[0].fields[1].values.buffer[0]);
+  const writerValue = writerUiService.getFieldValue(writerUiService.dataFieldKeys.WRITER, input);
+  const [value, setValue] = useState(writerValue);
 
   const [dataSource, setDataSource] = useState<any>({});
   const theme = useTheme();
@@ -27,18 +28,18 @@ export const SimplePanel: React.FC<Props> = ({ options, data: input, width, heig
 
   useEffect(() => {
     if (isDatasourceConfigured) {
-      // @ts-ignore
-      setValue(input.series[0].fields[1].values.buffer[0]);
-      return;
+      const writerValue = writerUiService.getFieldValue(writerUiService.dataFieldKeys.WRITER, input);
+      setValue(writerValue);
     }
-    const datasources = input?.request?.targets.map((x) => x.datasource);
+
+    const datasources = input?.request?.targets?.map((x) => x.datasource);
 
     if (Array.isArray(datasources) && datasources.length > 0) {
       datasources.map((datasource) => {
         return getDataSourceSrv()
           .get(datasource)
           .then((res) => {
-            if (res.meta.id === FLOW_FRAMEWORK_DATASOURCE_ID) {
+            if (res.meta.id === RUBIX_FRAMEWORK_DATASOURCE_ID) {
               setDataSource(res);
               changeIsDatasourceConfigured(true);
             } else {
@@ -68,10 +69,9 @@ export const SimplePanel: React.FC<Props> = ({ options, data: input, width, heig
     if (!value) {
       throw new Error('Something went wrong while trying to write to data source.');
     }
-    const oldSchedules = value.schedule.schedules;
     const schedules = {
-      events: { ...oldSchedules.events, ...data.events },
-      weekly: { ...oldSchedules.weekly, ...data.weekly },
+      events: { ...data.events },
+      weekly: { ...data.weekly },
       exception: { ...data.exception },
     };
 
@@ -83,8 +83,8 @@ export const SimplePanel: React.FC<Props> = ({ options, data: input, width, heig
     const scheduleService = dataSource?.services?.scheduleService;
 
     if (scheduleService && value) {
-      const response = await scheduleService.writeToScheduleId(value.uuid, output);
-      setValue(response);
+      const response = await scheduleService.writeToScheduleId(value.uuid, value.host_uuid, output);
+      setValue({ ...response, host_uuid: value.host_uuid });
     } else {
       throw new Error('Something went wrong while trying to write to data source.');
     }
@@ -92,6 +92,23 @@ export const SimplePanel: React.FC<Props> = ({ options, data: input, width, heig
   };
 
   const styles = getStyles();
+
+  if (!isDatasourceConfigured) {
+    return (
+      <div className={styles.container}>
+        <p className={styles.warningText}>Selected datasource is not correct!</p>
+      </div>
+    );
+  }
+
+  if (!value) {
+    return (
+      <div className={styles.container}>
+        <p className={styles.warningText}>Please select a schedule from appropriate Host!</p>
+      </div>
+    );
+  }
+
   return (
     <div
       className={cx(
@@ -156,6 +173,22 @@ const getStyles = stylesFactory(() => {
       bottom: 0;
       left: 0;
       padding: 10px;
+    `,
+    container: css`
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+    `,
+    warningText: css`
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #999;
+      text-transform: uppercase;
+      text-align: center;
+      width: 100%;
     `,
   };
 });

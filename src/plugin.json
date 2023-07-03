@@ -1,8 +1,7 @@
 {
-  "$schema": "https://raw.githubusercontent.com/grafana/grafana/master/docs/sources/developers/plugins/plugin.schema.json",
   "type": "panel",
-  "name": "FlowFramework Schedule Panel",
-  "id": "nube-i-o-grafana-flow-framework-schedule-pane",
+  "name": "Rubix OS Schedule Panel",
+  "id": "grafana-rubix-os-schedule-panel",
   "info": {
     "description": "Panel to control schedule for devices",
     "author": {
@@ -22,11 +21,11 @@
     "links": [
       {
         "name": "Website",
-        "url": "https://github.com/grafana/grafana-starter-panel"
+        "url": "https://github.com/NubeIO/grafana-rubix-os-schedule-panel"
       },
       {
         "name": "License",
-        "url": "https://github.com/grafana/grafana-starter-panel/blob/master/LICENSE"
+        "url": "https://github.com/NubeIO/grafana-rubix-os-schedule-panel/blob/master/LICENSE"
       }
     ],
     "screenshots": [],
