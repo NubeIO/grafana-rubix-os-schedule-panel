@@ -10,7 +10,6 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import ColorSelectorField from '../../common/colorSelectorField';
 import SliderValueField from 'components/common/sliderValueField';
-import DateSelectorField from 'components/common/dateSelectorField';
 import * as exceptionService from 'components/exception/exception.service';
 import exceptionFormValidation from 'components/exception/exception.validation';
 import { createFilterOptions } from '@material-ui/lab/useAutocomplete';

@@ -92,3 +92,6 @@ export interface InputData {
     };
   };
 }
+export interface DataFieldKeyI {
+  [key: string]: string;
+}
