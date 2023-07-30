@@ -84,17 +84,28 @@ function ExceptionFormUi(props: Props) {
                   }}
                   onBlur={() => {}}
                 />
-                <SliderValueField
-                  min={options.min}
-                  max={options.max}
-                  step={options.step}
-                  label="Value"
-                  errors={errors}
-                  touched={touched}
-                  value={values.value}
-                  name="value"
-                  onChange={(e: any, v: any) => setFieldValue('value', v)}
-                />
+                <div style={{ marginTop: 12 }} />
+                {options.hasPayload && (
+                  <SliderValueField
+                    min={options.min}
+                    max={options.max}
+                    step={options.step}
+                    inputType={options.inputType}
+                    label="Value"
+                    errors={errors}
+                    touched={touched}
+                    value={values.value}
+                    name="value"
+                    onChange={(value, error) => {
+                      if (error) {
+                        setFieldError('value', error);
+                        forceUpdate();
+                      } else {
+                        setFieldValue('value', value);
+                      }
+                    }}
+                  />
+                )}
                 <ColorSelectorField
                   name="holiday-color-field"
                   value={values.color}

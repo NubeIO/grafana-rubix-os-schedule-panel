@@ -19,6 +19,7 @@ import { convertTimeFromTimezone, convertWeekFromTimezone } from './hoc/withTime
 import { makeStyles } from '@material-ui/core/styles';
 import DateRangeCollection from './DateRangeCollection';
 import AutoCompleteSelectField from 'components/common/autoCompleteSearchField';
+import SliderValueField from './common/sliderValueField';
 
 const dayOptions = Object.values(DAY_MAP);
 const TIME_FORMAT = 'HH:mm';
@@ -347,46 +348,30 @@ export default function EventModal(props: EventModalProps) {
           function renderValues() {
             return (
               <div className={classes.input}>
-                {options.inputType === 'number' ? (
-                  <TextField
-                    {...defaultProps}
-                    label="Value"
-                    type="number"
-                    id="number-input"
-                    name="value"
-                    value={value}
-                    className={classes.textField}
-                    InputLabelProps={{
-                      shrink: true,
-                    }}
-                    inputProps={{
-                      step: options.step,
-                      min: options.min,
-                      max: options.max,
-                    }}
-                    helperText={(touched.value && errors.value) || ''}
-                    error={touched.value && Boolean(errors.value)}
-                  />
-                ) : (
-                  <>
-                    <Typography gutterBottom>Value</Typography>
-                    <Slider
-                      {...defaultProps}
-                      id="slider"
-                      name="value"
-                      min={options.min}
-                      max={options.max}
-                      value={value}
-                      marks={[
-                        { value: options.min, label: options.min },
-                        { value: options.max, label: options.max },
-                      ]}
-                      valueLabelDisplay="auto"
-                      aria-labelledby="continuous-slider"
-                      onChange={(e, v) => setFieldValue('value', v)}
-                    />
-                  </>
-                )}
+                <SliderValueField
+                  min={options.min}
+                  max={options.max}
+                  step={options.step}
+                  inputType={options.inputType}
+                  label="Value"
+                  errors={errors}
+                  touched={touched}
+                  value={value}
+                  name="value"
+                  onChange={(value, error) => {
+                    if (error) {
+                      setFieldError('value', error);
+                      forceUpdate();
+                    } else {
+                      setFieldValue('value', value);
+                    }
+                    if (errors.value != null) {
+                      delete errors.value;
+                      setErrors(errors);
+                      forceUpdate();
+                    }
+                  }}
+                />
               </div>
             );
           }

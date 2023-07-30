@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Slider from '@material-ui/core/Slider';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
@@ -9,18 +9,31 @@ interface Props {
   min: any;
   max: any;
   step: any;
-  value: number | number[];
+  value: string | number | number[] | undefined;
   label: string;
   inputType?: string;
   touched: any;
   errors: any;
   name: string;
-  onChange: any;
+  onChange: (eventDates: number, error: string) => void;
 }
 
 function SliderValueField(props: Props) {
-  const { min, max, step, label, value, inputType, touched, errors, name, onChange } = props;
+  const { min, max, step, label, value: input = 0, inputType, errors, name, onChange } = props;
+  var parseValue: number;
+  if (input instanceof String) {
+    parseValue = parseFloat(input.toString());
+  } else {
+    parseValue = input as number;
+  }
   const classes = fieldStyle();
+
+  const [value, setValue] = useState(parseValue);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    onChange(value, error);
+  }, [value, error]);
 
   switch (inputType) {
     case 'number':
@@ -43,9 +56,21 @@ function SliderValueField(props: Props) {
               min: min,
               max: max,
             }}
-            onChange={onChange}
-            helperText={(touched[name] && errors[name]) || ''}
-            error={touched[name] && Boolean(errors[name])}
+            onChange={(event) => {
+              const value = event.target.value;
+              try {
+                setValue(parseFloat(value));
+                if (value > min && value < max) {
+                  setError('');
+                } else {
+                  setError('Input should be less than ' + max + ' and greater than ' + min);
+                }
+              } catch (e) {
+                setError('Input should be a number.');
+              }
+            }}
+            helperText={errors[name] || ''}
+            error={Boolean(errors[name])}
           />
         </div>
       );
@@ -58,14 +83,17 @@ function SliderValueField(props: Props) {
             name="value"
             min={min}
             max={max}
-            value={value}
+            value={parseValue ?? 0}
+            step={step}
             marks={[
               { value: min, label: min },
               { value: max, label: max },
             ]}
             valueLabelDisplay="auto"
             aria-labelledby="continuous-slider"
-            onChange={onChange}
+            onChange={(_, value) => {
+              return onChange(value as number, '');
+            }}
           />
         </div>
       );
