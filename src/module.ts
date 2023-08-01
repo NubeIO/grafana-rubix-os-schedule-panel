@@ -48,7 +48,7 @@ export const plugin = new PanelPlugin<PanelOptions>(SimplePanel).setPanelOptions
       path: 'step',
       name: 'Step',
       defaultValue: 1,
-      showIf: (config) => config.hasPayload,
+      showIf: (config) => config.hasPayload && config.inputType === 'slider',
     })
     .addRadio({
       path: 'inputType',
@@ -66,6 +66,7 @@ export const plugin = new PanelPlugin<PanelOptions>(SimplePanel).setPanelOptions
           },
         ],
       },
+      showIf: (config) => config.hasPayload,
     })
     .addBooleanSwitch({
       path: 'disableWeeklyEvent',
