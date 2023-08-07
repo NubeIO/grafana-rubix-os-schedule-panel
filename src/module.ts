@@ -1,5 +1,4 @@
 import { PanelPlugin } from '@grafana/data';
-import moment from 'moment-timezone';
 import { PanelOptions } from './types';
 import { SimplePanel } from './SimplePanel';
 import ScheduleNamesPanelPlugin from './components/scheduleNamesPlugin';
@@ -77,13 +76,5 @@ export const plugin = new PanelPlugin<PanelOptions>(SimplePanel).setPanelOptions
       path: 'disableEvent',
       name: 'Disable Event',
       defaultValue: false,
-    })
-    .addSelect({
-      path: 'timezone',
-      name: 'Timezone',
-      settings: {
-        options: moment.tz.names().map((it) => ({ value: it, label: it })),
-      },
-      defaultValue: moment.tz.guess(),
     });
 });

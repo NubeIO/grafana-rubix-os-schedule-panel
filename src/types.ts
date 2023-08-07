@@ -14,7 +14,6 @@ export interface PanelOptions {
   inputType: InputType;
   disableWeeklyEvent: boolean;
   disableEvent: boolean;
-  timezone: string;
 }
 
 export interface EventDate {

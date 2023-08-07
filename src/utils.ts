@@ -60,40 +60,22 @@ export function enumerateDaysBetweenDates(
   return dates;
 }
 
-export function getStartAndEndWithTimezone(baseDate: moment.Moment, time: string, timezone: string) {
-  const startTime = time.split(':');
-  return moment.tz(
-    {
-      year: baseDate.year(),
-      month: baseDate.month(),
-      date: baseDate.date(),
-      hour: startTime[0],
-      minute: startTime[1],
-      second: startTime[2] || 0,
-    },
-    timezone
-  );
-}
-
 /**
  * Converts the given time into UTC by using the base date for date
  * @param baseDate - Used for setting the date (year, month, day)
  * @param time - Time in format HH:mm:ss or HH:mm
  * @return {moment} Time in UTC
  */
-export function getTimezoneFromStartAndEnd(baseDate: moment.Moment, time: string, timezone: string): moment.Moment {
+export function getFromStartAndEnd(baseDate: moment.Moment, time: string): moment.Moment {
   const startTime = time.split(':');
-  return moment.tz(
-    {
-      year: baseDate.year(),
-      month: baseDate.month(),
-      date: baseDate.date(),
-      hour: startTime[0],
-      minute: startTime[1],
-      second: startTime[2] || 0,
-    },
-    timezone
-  );
+  return moment({
+    year: baseDate.year(),
+    month: baseDate.month(),
+    date: baseDate.date(),
+    hour: Number(startTime[0]),
+    minute: Number(startTime[1]),
+    second: Number(startTime[2]) || 0,
+  });
 }
 
 /**
@@ -101,25 +83,24 @@ export function getTimezoneFromStartAndEnd(baseDate: moment.Moment, time: string
  * @param {ExtractionOption} options - Options used while extracting data from event
  * @return {{startDate: (moment.Moment), endDate: (moment.Moment)}}
  */
-function getStartAndEndDateTimezone(
+function getStartAndEndDate(
   event: Weekly,
-  options: ExtractionOption,
-  timezone: string
+  options: ExtractionOption
 ): { startDate: moment.Moment; endDate: moment.Moment } {
   const { day } = options;
   let time = day.clone();
-  const startDate = getTimezoneFromStartAndEnd(time, event.start, timezone);
+  const startDate = getFromStartAndEnd(time, event.start);
 
   let endDate = day.clone();
   time = event.start > event.end ? moment(endDate).add(1, 'days') : endDate;
-  endDate = getTimezoneFromStartAndEnd(time, event.end, timezone);
+  endDate = getFromStartAndEnd(time, event.end);
   return { startDate, endDate };
 }
 
-export const convertWeekToTimezone = (event: Weekly, timezone: string): moment.Moment[] => {
+export const convertWeek = (event: Weekly): moment.Moment[] => {
   const { start, days } = event;
   return enumerateDaysBetweenDates(moment().startOf('week'), moment().endOf('week'), true, true)
-    .map((el) => getTimezoneFromStartAndEnd(el, start, timezone))
+    .map((el) => getFromStartAndEnd(el, start))
     .filter((day) => days.includes(DAY_MAP[day.day()]));
 };
 
@@ -131,7 +112,6 @@ export const convertWeekToTimezone = (event: Weekly, timezone: string): moment.M
  */
 export function extractEvents(
   events: { [id: string]: Weekly | Event },
-  timezone: string,
   isHoliday = false,
   options?: ExtractionOption
 ): EventOutput[] {
@@ -146,8 +126,8 @@ export function extractEvents(
           const { start, end } = date;
           eventsCollection.push({
             id: eventId,
-            start: moment.tz(start, DATE_FORMAT, timezone).toDate(),
-            end: moment.tz(end, DATE_FORMAT, timezone).toDate(),
+            start: moment(start, DATE_FORMAT).toDate(),
+            end: moment(end, DATE_FORMAT).toDate(),
             title: event.name,
             value: event.value,
             color: event.color,
@@ -159,16 +139,16 @@ export function extractEvents(
         });
       } else {
         const { dayString } = options;
-        const { startDate, endDate } = getStartAndEndDateTimezone(event as Weekly, options, timezone);
+        const { startDate, endDate } = getStartAndEndDate(event as Weekly, options);
 
         eventsCollection.push({
           id: eventId,
-          start: moment.tz(startDate, timezone).toDate(),
-          end: moment.tz(endDate, timezone).toDate(),
+          start: moment(startDate).toDate(),
+          end: moment(endDate).toDate(),
           title: event.name,
           value: event.value,
           color: event.color,
-          days: convertWeekToTimezone(event as Weekly, timezone),
+          days: convertWeek(event as Weekly),
           isWeekly: true,
           dayString,
           event: event,

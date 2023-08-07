@@ -11,8 +11,6 @@ import Autocomplete, { createFilterOptions } from '@material-ui/lab/Autocomplete
 import { Theme, Dialog, DialogTitle, createStyles, DialogContent, DialogActions } from '@material-ui/core';
 
 import { DAY_MAP } from '../utils';
-import Slider from '@material-ui/core/Slider';
-import Typography from '@material-ui/core/Typography';
 import ColorSelector from './renderProps/ColorSelector';
 import { convertTimeFromTimezone, convertWeekFromTimezone } from './hoc/withTimezone';
 
@@ -70,14 +68,13 @@ interface EventModalProps {
   operation: Operation;
   eventOutput: EventOutput | null;
   options: PanelOptions;
-  timezone: string;
   scheduleNames: string[];
   onClose: () => void;
   onSubmit: (event: Weekly | Event, id: string) => void;
   onDelete: (id: string) => void;
 }
 
-const getAddEventInitialValues = (options: PanelOptions, isWeekly = false, timezone: string) => {
+const getAddEventInitialValues = (options: PanelOptions, isWeekly = false) => {
   if (isWeekly) {
     return {
       name: options.defaultTitle,
@@ -93,8 +90,8 @@ const getAddEventInitialValues = (options: PanelOptions, isWeekly = false, timez
     name: options.defaultTitle,
     dates: [
       {
-        start: moment.tz(moment(), timezone).format(DATE_FORMAT),
-        end: moment.tz(moment(), timezone).add(1, 'hour').format(DATE_FORMAT),
+        start: moment().format(DATE_FORMAT),
+        end: moment().add(1, 'hour').format(DATE_FORMAT),
       },
     ],
     value: options.default || options.min,
@@ -102,12 +99,7 @@ const getAddEventInitialValues = (options: PanelOptions, isWeekly = false, timez
   };
 };
 
-const getEditEventInitialValues = (
-  eventOutput: EventOutput,
-  options: PanelOptions,
-  isWeekly: boolean,
-  timezone: string
-) => {
+const getEditEventInitialValues = (eventOutput: EventOutput, options: PanelOptions, isWeekly: boolean) => {
   if (isWeekly) {
     const event: Weekly = eventOutput.backupEvent as Weekly;
     return {
@@ -126,8 +118,8 @@ const getEditEventInitialValues = (
     dates:
       eventOutput?.dates?.map(function (date) {
         return {
-          start: moment.tz(date.start, DATE_FORMAT, timezone).format(DATE_FORMAT),
-          end: moment.tz(date.end, DATE_FORMAT, timezone).format(DATE_FORMAT),
+          start: moment(date.start, DATE_FORMAT).format(DATE_FORMAT),
+          end: moment(date.end, DATE_FORMAT).format(DATE_FORMAT),
         };
       }) || [],
     value: event.value,
@@ -135,15 +127,10 @@ const getEditEventInitialValues = (
   };
 };
 
-const getInitialValues = (
-  eventOutput: EventOutput | null,
-  options: PanelOptions,
-  isWeekly: boolean,
-  timezone: string
-) => {
+const getInitialValues = (eventOutput: EventOutput | null, options: PanelOptions, isWeekly: boolean) => {
   return eventOutput
-    ? getEditEventInitialValues(eventOutput, options, isWeekly, timezone)
-    : getAddEventInitialValues(options, isWeekly, timezone);
+    ? getEditEventInitialValues(eventOutput, options, isWeekly)
+    : getAddEventInitialValues(options, isWeekly);
 };
 
 const getValidationSchema = (options: PanelOptions, isWeekly: boolean) => {
@@ -164,18 +151,7 @@ const getValidationSchema = (options: PanelOptions, isWeekly: boolean) => {
 };
 
 export default function EventModal(props: EventModalProps) {
-  const {
-    options,
-    isWeekly,
-    timezone,
-    operation,
-    isOpenModal,
-    eventOutput,
-    scheduleNames,
-    onClose,
-    onSubmit,
-    onDelete,
-  } = props;
+  const { options, isWeekly, operation, isOpenModal, eventOutput, scheduleNames, onClose, onSubmit, onDelete } = props;
   const [value, setValue] = useState(0);
   const classes = useStyles();
   const handleDeleteEvent = () => {
@@ -186,13 +162,13 @@ export default function EventModal(props: EventModalProps) {
 
   const handleSubmit = (data: any) => {
     if (isWeekly) {
-      data.days = convertWeekFromTimezone(data.days, data.start, timezone);
-      data.start = convertTimeFromTimezone(moment(data.start, TIME_FORMAT), timezone).format(TIME_FORMAT);
-      data.end = convertTimeFromTimezone(moment(data.end, TIME_FORMAT), timezone).format(TIME_FORMAT);
+      data.days = convertWeekFromTimezone(data.days, data.start);
+      data.start = convertTimeFromTimezone(moment(data.start, TIME_FORMAT)).format(TIME_FORMAT);
+      data.end = convertTimeFromTimezone(moment(data.end, TIME_FORMAT)).format(TIME_FORMAT);
     } else {
       data.dates = data.dates.map(({ start, end }: EventDate) => ({
-        start: convertTimeFromTimezone(moment(start), timezone).format(DATE_FORMAT),
-        end: convertTimeFromTimezone(moment(end), timezone).format(DATE_FORMAT),
+        start: convertTimeFromTimezone(moment(start)).format(DATE_FORMAT),
+        end: convertTimeFromTimezone(moment(end)).format(DATE_FORMAT),
       }));
     }
     onSubmit(data, eventOutput?.id || uuidv4());
@@ -211,7 +187,7 @@ export default function EventModal(props: EventModalProps) {
       open={isOpenModal}
     >
       <Formik
-        initialValues={getInitialValues(eventOutput, options, isWeekly, timezone)}
+        initialValues={getInitialValues(eventOutput, options, isWeekly)}
         validationSchema={Yup.object(getValidationSchema(options, isWeekly))}
         onSubmit={handleSubmit}
       >
