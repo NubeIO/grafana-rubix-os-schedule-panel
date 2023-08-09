@@ -91,7 +91,7 @@ function ExceptionFormUi(props: Props) {
                     max={options.max}
                     step={options.step}
                     inputType={options.inputType}
-                    label="Value"
+                    label={options.inputName ?? 'Value'}
                     errors={errors}
                     touched={touched}
                     value={values.value}

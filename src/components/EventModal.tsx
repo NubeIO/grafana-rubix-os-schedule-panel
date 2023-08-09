@@ -329,7 +329,7 @@ export default function EventModal(props: EventModalProps) {
                   max={options.max}
                   step={options.step}
                   inputType={options.inputType}
-                  label="Value"
+                  label={options.inputName ?? 'Value'}
                   errors={errors}
                   touched={touched}
                   value={value}
