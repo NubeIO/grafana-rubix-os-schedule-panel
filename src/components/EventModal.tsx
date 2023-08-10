@@ -69,6 +69,7 @@ interface EventModalProps {
   eventOutput: EventOutput | null;
   options: PanelOptions;
   scheduleNames: string[];
+  defaultScheduleName: string;
   onClose: () => void;
   onSubmit: (event: Weekly | Event, id: string) => void;
   onDelete: (id: string) => void;
@@ -144,14 +145,34 @@ const getValidationSchema = (options: PanelOptions, isWeekly: boolean) => {
   }
   if (isWeekly) {
     validationSchema['days'] = Yup.array().min(1, 'Select at least a day');
+    validationSchema['start'] = Yup.string().required('Start date is required');
+    validationSchema['end'] = Yup.string().required('End date is required');
   } else {
-    validationSchema['dates'] = Yup.array().min(1);
+    validationSchema['dates'] = Yup.array()
+      .of(
+        Yup.object().shape({
+          start: Yup.date().required('Start date is required'),
+          end: Yup.date().required('End date is required'),
+        })
+      )
+      .min(1);
   }
   return validationSchema;
 };
 
 export default function EventModal(props: EventModalProps) {
-  const { options, isWeekly, operation, isOpenModal, eventOutput, scheduleNames, onClose, onSubmit, onDelete } = props;
+  const {
+    options,
+    isWeekly,
+    operation,
+    isOpenModal,
+    eventOutput,
+    scheduleNames,
+    defaultScheduleName,
+    onClose,
+    onSubmit,
+    onDelete,
+  } = props;
   const [value, setValue] = useState(0);
   const classes = useStyles();
   const handleDeleteEvent = () => {
@@ -187,7 +208,7 @@ export default function EventModal(props: EventModalProps) {
       open={isOpenModal}
     >
       <Formik
-        initialValues={getInitialValues(eventOutput, options, isWeekly)}
+        initialValues={getInitialValues(eventOutput, { ...options, defaultTitle: defaultScheduleName }, isWeekly)}
         validationSchema={Yup.object(getValidationSchema(options, isWeekly))}
         onSubmit={handleSubmit}
       >

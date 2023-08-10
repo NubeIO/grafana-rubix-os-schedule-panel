@@ -18,6 +18,7 @@ function AutoCompleteSearchField(props: any) {
         classes={{
           listbox: classes.listbox,
         }}
+        disableClearable
         getOptionLabel={(option: any) => {
           // Value selected with enter, right from the input
           if (typeof option === 'string') {

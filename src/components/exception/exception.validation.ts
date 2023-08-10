@@ -3,7 +3,14 @@ import { PanelOptions } from 'types';
 
 const FORM_SCHEMA = {
   name: Yup.string().required('Title is required').nullable(),
-  dates: Yup.array().min(1),
+  dates: Yup.array()
+    .of(
+      Yup.object().shape({
+        start: Yup.date().required('Start date is required'),
+        end: Yup.date().required('End date is required'),
+      })
+    )
+    .min(1),
   value: (min: number, max: number) => {
     if (min && max) {
       return Yup.number().min(min, `Should be higher than ${min}`).max(max, `Should be lower than ${max}`).nullable();

@@ -27,6 +27,7 @@ interface Props {
   syncData: Function;
   openGenericDialog?: Function;
   scheduleNames: string[];
+  defaultScheduleName: string;
 }
 
 export const defaultSchedule = { events: {}, weekly: {}, exception: {} };
@@ -235,6 +236,7 @@ function ScheduleCalendar(props: Props) {
       <EventModal
         isOpenModal={isOpenModal}
         scheduleNames={props.scheduleNames}
+        defaultScheduleName={props.defaultScheduleName}
         isWeekly={isWeekly}
         operation={operation}
         eventOutput={eventOutput}
