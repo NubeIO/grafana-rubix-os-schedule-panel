@@ -194,6 +194,7 @@ function ScheduleCalendar(props: Props) {
         <ToolbarButton
           variant="default"
           icon="plus-circle"
+          disabled={options.disableException}
           onClick={() => openGenericDialog(DIALOG_NAMES.exceptionDialog, { isAddForm: true })}
         >
           Exception

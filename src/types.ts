@@ -14,6 +14,7 @@ export interface PanelOptions {
   scheduleNames?: any;
   inputType: InputType;
   disableWeeklyEvent: boolean;
+  disableException: boolean;
   disableEvent: boolean;
 }
 

@@ -115,6 +115,7 @@ export const SimplePanel: React.FC<Props> = ({ data: input, width, height }) => 
     default: value.default_payload,
     defaultTitle: config.default_name,
     disableWeeklyEvent: config.disable_weekly,
+    disableException: config.disable_exception,
     disableEvent: config.disable_event,
     hasPayload: value.enable_payload,
     inputType: config.input_type,
