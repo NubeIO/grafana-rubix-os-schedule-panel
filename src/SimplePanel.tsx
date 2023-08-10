@@ -80,13 +80,14 @@ export const SimplePanel: React.FC<Props> = ({ data: input, width, height }) => 
     setIsRunning(true);
 
     const output = {
-      schedule: { schedules: schedules, config },
+      schedules: schedules,
+      config,
     };
     const scheduleService = dataSource?.services?.scheduleService;
 
     if (scheduleService && value) {
       const response = await scheduleService.writeToScheduleId(value.uuid, value.host_uuid, output);
-      setValue({ ...response, host_uuid: value.host_uuid });
+      setValue({ ...value, schedule: response, host_uuid: value.host_uuid });
     } else {
       throw new Error('Something went wrong while trying to write to data source.');
     }
