@@ -23,7 +23,7 @@ const withScheduleNames = (ComposedComponent: any) => (props: Props) => {
     let { scheduleNames = [], defaultTitle } = props.options || {};
     const isEmpty = scheduleNames.length === 0;
     setScheduleNameCollection(isEmpty ? ['Default'] : scheduleNames);
-    updateDefaultScheduleName(defaultTitle ?? isEmpty ? 'Default' : scheduleNames[0]);
+    updateDefaultScheduleName(defaultTitle ?? (isEmpty ? 'Default' : scheduleNames[0]));
   }, [props.options]);
 
   return (
