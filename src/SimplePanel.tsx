@@ -13,7 +13,7 @@ interface Props extends PanelProps<PanelOptions> {}
 
 const RUBIX_FRAMEWORK_DATASOURCE_ID = 'grafana-rubix-os-data-source';
 
-export const SimplePanel: React.FC<Props> = ({ options, data: input, width, height }) => {
+export const SimplePanel: React.FC<Props> = ({ data: input, width, height }) => {
   const [isDatasourceConfigured, changeIsDatasourceConfigured] = useState(false);
   const [writable] = useState(true);
   const [isRunning, setIsRunning] = useState(false);
@@ -65,6 +65,8 @@ export const SimplePanel: React.FC<Props> = ({ options, data: input, width, heig
     },
   });
 
+  const { config = {} } = value.schedule || {};
+
   const syncData = async (data: RawData) => {
     if (!value) {
       throw new Error('Something went wrong while trying to write to data source.');
@@ -78,13 +80,14 @@ export const SimplePanel: React.FC<Props> = ({ options, data: input, width, heig
     setIsRunning(true);
 
     const output = {
-      schedule: { schedules: schedules },
+      schedules: schedules,
+      config,
     };
     const scheduleService = dataSource?.services?.scheduleService;
 
     if (scheduleService && value) {
       const response = await scheduleService.writeToScheduleId(value.uuid, value.host_uuid, output);
-      setValue({ ...response, host_uuid: value.host_uuid });
+      setValue({ ...value, schedule: response, host_uuid: value.host_uuid });
     } else {
       throw new Error('Something went wrong while trying to write to data source.');
     }
@@ -108,6 +111,21 @@ export const SimplePanel: React.FC<Props> = ({ options, data: input, width, heig
       </div>
     );
   }
+
+  const options: PanelOptions = {
+    default: value.default_payload,
+    defaultTitle: config.default_name,
+    disableWeeklyEvent: config.disable_weekly,
+    disableException: config.disable_exception,
+    disableEvent: config.disable_event,
+    hasPayload: value.enable_payload,
+    inputType: config.input_type,
+    max: value.max_payload,
+    inputName: config.input_name,
+    min: value.min_payload,
+    scheduleNames: config.names,
+    step: config.step,
+  };
 
   return (
     <div

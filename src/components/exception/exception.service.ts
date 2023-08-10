@@ -40,40 +40,30 @@ interface ExceptionDTO {
   value: number;
 }
 
-export function transformExceptionEvent(
-  event: ExceptionDTO,
-  selectedYear: number,
-  timezone: string
-): ExceptionOutputEvent {
+export function transformExceptionEvent(event: ExceptionDTO, selectedYear: number): ExceptionOutputEvent {
   return {
     ...event,
     dates:
       event?.dates?.map(function (date) {
         return {
-          start: moment.tz(date.start, DATE_FORMAT, timezone).format(DATE_FORMAT),
-          end: moment.tz(date.end, DATE_FORMAT, timezone).format(DATE_FORMAT),
+          start: moment(date.start, DATE_FORMAT).format(DATE_FORMAT),
+          end: moment(date.end, DATE_FORMAT).format(DATE_FORMAT),
         };
       }) || [],
     title: event.name,
   };
 }
 
-export const convertDateTimeToDate = (datetime: string, timezone: string) => {
-  const m = moment.tz(datetime, timezone);
+export const convertDateTimeToDate = (datetime: string) => {
+  const m = moment(datetime);
   return new Date(m.year(), m.month(), m.date(), 0, 0, 0);
 };
 
-export function getExceptionEvents(
-  exception: any = {},
-  selectedDate: string,
-  timezone: string
-): ExceptionOutputEvent[] {
+export function getExceptionEvents(exception: any = {}, selectedDate: string): ExceptionOutputEvent[] {
   const sDate = new Date(selectedDate);
   const selectedYear = sDate.getFullYear();
   const selectedYears = [selectedYear - 1, selectedYear, selectedYear + 1];
   return selectedYears
-    .map((currentYear) =>
-      Object.keys(exception).map((key) => transformExceptionEvent(exception[key], currentYear, timezone))
-    )
+    .map((currentYear) => Object.keys(exception).map((key) => transformExceptionEvent(exception[key], currentYear)))
     .flat();
 }

@@ -10,11 +10,12 @@ export interface PanelOptions {
   max?: number;
   default?: number;
   step?: number;
+  inputName?: string;
   scheduleNames?: any;
   inputType: InputType;
   disableWeeklyEvent: boolean;
+  disableException: boolean;
   disableEvent: boolean;
-  timezone: string;
 }
 
 export interface EventDate {

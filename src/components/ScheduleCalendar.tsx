@@ -27,6 +27,7 @@ interface Props {
   syncData: Function;
   openGenericDialog?: Function;
   scheduleNames: string[];
+  defaultScheduleName: string;
 }
 
 export const defaultSchedule = { events: {}, weekly: {}, exception: {} };
@@ -53,7 +54,6 @@ function ScheduleCalendar(props: Props) {
   }
 
   const staticLocalizer = momentLocalizer(moment);
-  const timezone = options.timezone || 'UTC';
 
   const [eventCollection, setEventCollection] = useState<EventOutput[]>([]);
   const [visibleDate, setVisibleDate] = useState(moment());
@@ -73,8 +73,8 @@ function ScheduleCalendar(props: Props) {
 
     let eventsCollection: EventOutput[] = [];
 
-    const isolatedEvents = extractEvents(events, timezone);
-    const exceptionEvents = extractEvents(exception, timezone, true);
+    const isolatedEvents = extractEvents(events);
+    const exceptionEvents = extractEvents(exception, true);
 
     const days = getDaysArrayByMonth(visibleDate);
 
@@ -99,7 +99,7 @@ function ScheduleCalendar(props: Props) {
       const dayString = DAY_MAP[dayNumeric];
       const dayEventsMap = dayEventMap[dayString];
       if (dayEventsMap) {
-        const dayEvents = extractEvents(dayEventsMap, timezone, false, {
+        const dayEvents = extractEvents(dayEventsMap, false, {
           day,
           dayString,
         });
@@ -190,13 +190,11 @@ function ScheduleCalendar(props: Props) {
   return (
     <>
       <ToolbarButtonRow>
-        <ToolbarButton variant="default" disabled>
-          {timezone}
-        </ToolbarButton>
         <div className={classes.blankSpace} />
         <ToolbarButton
           variant="default"
           icon="plus-circle"
+          disabled={options.disableException}
           onClick={() => openGenericDialog(DIALOG_NAMES.exceptionDialog, { isAddForm: true })}
         >
           Exception
@@ -224,7 +222,6 @@ function ScheduleCalendar(props: Props) {
           events={eventCollection}
           startAccessorField="start"
           endAccessorField="end"
-          timezone={timezone}
           onNavigate={onNavigate}
           onSelectEvent={onSelectEvent}
           eventPropGetter={eventStyleGetter}
@@ -240,11 +237,11 @@ function ScheduleCalendar(props: Props) {
       <EventModal
         isOpenModal={isOpenModal}
         scheduleNames={props.scheduleNames}
+        defaultScheduleName={props.defaultScheduleName}
         isWeekly={isWeekly}
         operation={operation}
         eventOutput={eventOutput}
         options={options}
-        timezone={timezone}
         onClose={onModalClose}
         onSubmit={handleModalSubmit}
         onDelete={handleModalDelete}

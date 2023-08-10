@@ -15,21 +15,15 @@ interface Props {
   openGenericDialog?: Function;
 }
 
-function getScheduleNames(scheduleNames: any, scheduleNameIds: any) {
-  if (!(scheduleNameIds && scheduleNameIds.length > 0)) {
-    return [];
-  }
-  return scheduleNameIds.map((id: string) => scheduleNames[id].name);
-}
-
 const withScheduleNames = (ComposedComponent: any) => (props: Props) => {
   const [scheduleNameCollection, setScheduleNameCollection] = useState<string[]>([]);
   const [defaultScheduleName, updateDefaultScheduleName] = useState<string | undefined>();
 
   useEffect(() => {
-    let { scheduleNames = {}, defaultTitle } = props.options || {};
-    setScheduleNameCollection(getScheduleNames(scheduleNames.scheduleNames, scheduleNames.scheduleNameIds));
-    updateDefaultScheduleName(defaultTitle);
+    let { scheduleNames = [], defaultTitle } = props.options || {};
+    const isEmpty = scheduleNames.length === 0;
+    setScheduleNameCollection(isEmpty ? ['Default'] : scheduleNames);
+    updateDefaultScheduleName(defaultTitle ?? (isEmpty ? 'Default' : scheduleNames[0]));
   }, [props.options]);
 
   return (

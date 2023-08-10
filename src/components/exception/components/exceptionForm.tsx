@@ -91,7 +91,7 @@ function ExceptionFormUi(props: Props) {
                     max={options.max}
                     step={options.step}
                     inputType={options.inputType}
-                    label="Value"
+                    label={options.inputName ?? 'Value'}
                     errors={errors}
                     touched={touched}
                     value={values.value}
@@ -133,20 +133,15 @@ function ExceptionFormUi(props: Props) {
   );
 }
 
-const getInitialFormValues = (
-  isAddForm: boolean | undefined,
-  exception: Exception,
-  defaultValues: any = {},
-  timezone: string
-) => {
+const getInitialFormValues = (isAddForm: boolean | undefined, exception: Exception, defaultValues: any = {}) => {
   if (isAddForm) {
     return {
       id: null,
       name: defaultValues.name || null,
       dates: [
         {
-          start: moment.tz(moment(), timezone).format(DATE_FORMAT),
-          end: moment.tz(moment(), timezone).add(1, 'hour').format(DATE_FORMAT),
+          start: moment().format(DATE_FORMAT),
+          end: moment().add(1, 'hour').format(DATE_FORMAT),
         },
       ],
       value: defaultValues.value || defaultValues.min,
@@ -219,15 +214,10 @@ function ExceptionForm(props: ExceptionFormProps) {
     handleUpdateException(props.exception.id, values, output);
   }
 
-  const initialFormValues = getInitialFormValues(
-    props.isAddForm,
-    props.exception,
-    {
-      name: props.defaultScheduleName,
-      value: props.options.default || props.options.min,
-    },
-    props.options.timezone
-  );
+  const initialFormValues = getInitialFormValues(props.isAddForm, props.exception, {
+    name: props.defaultScheduleName,
+    value: props.options.default || props.options.min,
+  });
 
   return (
     <ExceptionFormUi
