@@ -192,7 +192,7 @@ function ScheduleCalendar(props: Props) {
       <ToolbarButtonRow>
         <div className={classes.blankSpace} />
         <ToolbarButton
-          variant="default"
+          variant="canvas"
           icon="plus-circle"
           disabled={options.disableException}
           onClick={() => openGenericDialog(DIALOG_NAMES.exceptionDialog, { isAddForm: true })}
@@ -200,7 +200,7 @@ function ScheduleCalendar(props: Props) {
           Exception
         </ToolbarButton>
         <ToolbarButton
-          variant="default"
+          variant="canvas"
           icon="plus-circle"
           onClick={() => addEvent(true)}
           disabled={options.disableWeeklyEvent}
@@ -208,7 +208,7 @@ function ScheduleCalendar(props: Props) {
           Weekly Event
         </ToolbarButton>
         <ToolbarButton
-          variant="default"
+          variant="canvas"
           icon="plus-circle"
           onClick={() => addEvent(false)}
           disabled={options.disableEvent}
