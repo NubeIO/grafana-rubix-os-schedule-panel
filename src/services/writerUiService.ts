@@ -18,5 +18,5 @@ export const getFieldValue = (fieldKey: string, data: PanelData): any => {
     throw new Error('Data field key is required');
   }
 
-  return _get(series, `${latestIdx}.fields[${Number(fieldKey)}].values.buffer[0]`, null);
+  return _get(series, `${latestIdx}.fields[${Number(fieldKey)}].values[0]`, null);
 };
