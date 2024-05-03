@@ -20,7 +20,7 @@ interface Props {
 
 function SliderValueField(props: Props) {
   const { min, max, step, label, value: input = 0, inputType, errors, name, onChange } = props;
-  var parseValue: number;
+  let parseValue: number;
   if (input instanceof String) {
     parseValue = parseFloat(input.toString());
   } else {
