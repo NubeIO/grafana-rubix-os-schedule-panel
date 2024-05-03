@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import moment from 'moment-timezone';
-import { ButtonGroup, RadioButtonGroup, Spinner, ToolbarButton, ToolbarButtonRow, useTheme } from '@grafana/ui';
+import { ButtonGroup, RadioButtonGroup, Spinner, ToolbarButton, ToolbarButtonRow, useTheme2 } from '@grafana/ui';
 import flowRight from 'lodash/flowRight';
 import _cloneDeep from 'lodash/cloneDeep';
 import MomentUitls from '@date-io/moment';
@@ -46,7 +46,7 @@ function ScheduleCalendar(props: Props) {
   const { value, options, isRunning, setIsRunning, syncData, openGenericDialog = (f: any) => f } = props;
 
   const classes = useStyles();
-  const theme = useTheme();
+  const theme = useTheme2();
   if (theme.isDark) {
     require('./ScheduleCalendarDark.scss');
   } else {
