@@ -2,7 +2,7 @@ name: release-build
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, v11 ]
     tags: [ "v*" ]
     paths-ignore:
       - ".github/ISSUE_TEMPLATE/**"
@@ -11,7 +11,7 @@ on:
       - "LICENSE"
   pull_request:
     types: [ opened, synchronize, reopened, closed ]
-    branches: [ master ]
+    branches: [ master, v11 ]
 
 env:
   NODE_VERSION: 14
