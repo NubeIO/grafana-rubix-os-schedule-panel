@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import moment from 'moment-timezone';
-import { ButtonGroup, RadioButtonGroup, Spinner, ToolbarButton, ToolbarButtonRow, useTheme } from '@grafana/ui';
+import { ButtonGroup, RadioButtonGroup, Spinner, ToolbarButton, ToolbarButtonRow, useTheme2 } from '@grafana/ui';
 import flowRight from 'lodash/flowRight';
 import _cloneDeep from 'lodash/cloneDeep';
 import MomentUitls from '@date-io/moment';
@@ -46,7 +46,7 @@ function ScheduleCalendar(props: Props) {
   const { value, options, isRunning, setIsRunning, syncData, openGenericDialog = (f: any) => f } = props;
 
   const classes = useStyles();
-  const theme = useTheme();
+  const theme = useTheme2();
   if (theme.isDark) {
     require('./ScheduleCalendarDark.scss');
   } else {
@@ -192,7 +192,7 @@ function ScheduleCalendar(props: Props) {
       <ToolbarButtonRow>
         <div className={classes.blankSpace} />
         <ToolbarButton
-          variant="default"
+          variant="canvas"
           icon="plus-circle"
           disabled={options.disableException}
           onClick={() => openGenericDialog(DIALOG_NAMES.exceptionDialog, { isAddForm: true })}
@@ -200,7 +200,7 @@ function ScheduleCalendar(props: Props) {
           Exception
         </ToolbarButton>
         <ToolbarButton
-          variant="default"
+          variant="canvas"
           icon="plus-circle"
           onClick={() => addEvent(true)}
           disabled={options.disableWeeklyEvent}
@@ -208,7 +208,7 @@ function ScheduleCalendar(props: Props) {
           Weekly Event
         </ToolbarButton>
         <ToolbarButton
-          variant="default"
+          variant="canvas"
           icon="plus-circle"
           onClick={() => addEvent(false)}
           disabled={options.disableEvent}

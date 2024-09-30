@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { PanelProps } from '@grafana/data';
 import { PanelOptions, RawData } from 'types';
 import { css, cx } from 'emotion';
-import { stylesFactory, useTheme } from '@grafana/ui';
+import { useStyles2, useTheme2 } from '@grafana/ui';
 import ScheduleCalendar from './components/ScheduleCalendar';
 import { createTheme, ThemeProvider } from '@material-ui/core';
 import { blue, red } from '@material-ui/core/colors';
@@ -21,7 +21,7 @@ export const SimplePanel: React.FC<Props> = ({ data: input, width, height }) => 
   const [value, setValue] = useState(writerValue);
 
   const [dataSource, setDataSource] = useState<any>({});
-  const theme = useTheme();
+  const theme = useTheme2();
   const palletType = theme.isDark ? 'dark' : 'light';
   const mainPrimaryColor = theme.isDark ? blue[500] : blue[900];
   const mainSecondaryColor = theme.isDark ? red[500] : red[900];
@@ -65,7 +65,7 @@ export const SimplePanel: React.FC<Props> = ({ data: input, width, height }) => 
     },
   });
 
-  const { config = {} } = value.schedule || {};
+  const { config = {} } = value?.schedule || {};
 
   const syncData = async (data: RawData) => {
     if (!value) {
@@ -94,7 +94,7 @@ export const SimplePanel: React.FC<Props> = ({ data: input, width, height }) => 
     setIsRunning(false);
   };
 
-  const styles = getStyles();
+  const styles = useStyles2(getStyles);
 
   if (!isDatasourceConfigured) {
     return (
@@ -152,8 +152,7 @@ export const SimplePanel: React.FC<Props> = ({ data: input, width, height }) => 
   );
 };
 
-const getStyles = stylesFactory(() => {
-  return {
+const getStyles = () => ({
     wrapper: css`
       position: relative;
     `,
@@ -208,5 +207,4 @@ const getStyles = stylesFactory(() => {
       text-align: center;
       width: 100%;
     `,
-  };
 });

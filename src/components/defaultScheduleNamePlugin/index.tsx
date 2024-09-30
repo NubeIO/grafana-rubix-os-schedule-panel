@@ -19,10 +19,10 @@ function DefaultScheduleName(props: any) {
     <Select
       {...props}
       options={getOptions(props)}
-      getOptionLabel={(option) => option?.name}
-      getOptionValue={(option) => option?.id}
+      getOptionLabel={(option: any) => option?.name}
+      getOptionValue={(option: any) => option?.id}
       value={val}
-      onChange={(v) => {
+      onChange={(v: any) => {
         onChange(v.name);
       }}
     />

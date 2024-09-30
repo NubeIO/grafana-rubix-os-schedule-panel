@@ -14,7 +14,7 @@ on:
     branches: [ master, v11 ]
 
 env:
-  NODE_VERSION: 14
+  NODE_VERSION: 20
   CURRENT_REPO: grafana-rubix-os-schedule-panel
 
 jobs:
