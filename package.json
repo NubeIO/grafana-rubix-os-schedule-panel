@@ -1,6 +1,6 @@
 {
   "name": "grafana-rubix-os-schedule-panel",
-  "version": "1.1.0",
+  "version": "11.0.0",
   "description": "Panel to control schedule for devices",
   "scripts": {
     "build": "webpack -c ./.config/webpack/webpack.config.ts --env production",
