@@ -72,12 +72,6 @@ jobs:
           path: "**/node_modules"
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
 
-      - name: Set Yarn to Use Public npm Registry
-        run: yarn config set registry https://registry.npmjs.org/
-
-      - name: Clear Yarn Cache
-        run: yarn cache clean
-
       - name: YARN install
         if: steps.cache_yarn.outputs.cache-hit != 'true'
         run: yarn install

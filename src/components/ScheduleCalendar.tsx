@@ -193,36 +193,35 @@ function ScheduleCalendar(props: Props) {
 
   return (
     <>
-      {
-        !isNotEditable &&
-          <ToolbarButtonRow>
-            <div className={classes.blankSpace} />
-            <ToolbarButton
-              variant="default"
-              icon="plus-circle"
-              disabled={options.disableException}
-              onClick={() => openGenericDialog(DIALOG_NAMES.exceptionDialog, { isAddForm: true })}
-            >
-              Exception
-            </ToolbarButton>
-            <ToolbarButton
-              variant="default"
-              icon="plus-circle"
-              onClick={() => addEvent(true)}
-              disabled={options.disableWeeklyEvent}
-            >
-              Weekly Event
-            </ToolbarButton>
-            <ToolbarButton
-              variant="default"
-              icon="plus-circle"
-              onClick={() => addEvent(false)}
-              disabled={options.disableEvent}
-            >
-              Event
-            </ToolbarButton>
-          </ToolbarButtonRow>
-      }
+      {!isNotEditable && (
+        <ToolbarButtonRow>
+          <div className={classes.blankSpace} />
+          <ToolbarButton
+            variant="default"
+            icon="plus-circle"
+            disabled={options.disableException}
+            onClick={() => openGenericDialog(DIALOG_NAMES.exceptionDialog, { isAddForm: true })}
+          >
+            Exception
+          </ToolbarButton>
+          <ToolbarButton
+            variant="default"
+            icon="plus-circle"
+            onClick={() => addEvent(true)}
+            disabled={options.disableWeeklyEvent}
+          >
+            Weekly Event
+          </ToolbarButton>
+          <ToolbarButton
+            variant="default"
+            icon="plus-circle"
+            onClick={() => addEvent(false)}
+            disabled={options.disableEvent}
+          >
+            Event
+          </ToolbarButton>
+        </ToolbarButtonRow>
+      )}
       <div className={classes.calendar}>
         <CalendarHOC
           value={value}
