@@ -28,6 +28,7 @@ interface Props {
   openGenericDialog?: Function;
   scheduleNames: string[];
   defaultScheduleName: string;
+  isNotEditable: boolean;
 }
 
 export const defaultSchedule = { events: {}, weekly: {}, exception: {} };
@@ -43,7 +44,7 @@ function AppContainer(props: any) {
 }
 
 function ScheduleCalendar(props: Props) {
-  const { value, options, isRunning, setIsRunning, syncData, openGenericDialog = (f: any) => f } = props;
+  const { value, options, isRunning, setIsRunning, syncData, isNotEditable, openGenericDialog = (f: any) => f } = props;
 
   const classes = useStyles();
   const theme = useTheme();
@@ -132,6 +133,9 @@ function ScheduleCalendar(props: Props) {
   };
 
   const onSelectEvent = (eventOutput: EventOutput) => {
+    if (isNotEditable) {
+      return;
+    }
     if (eventOutput.isHoliday) {
       return openGenericDialog(DIALOG_NAMES.editExceptionDialog, { exception: eventOutput });
     }
@@ -189,33 +193,36 @@ function ScheduleCalendar(props: Props) {
 
   return (
     <>
-      <ToolbarButtonRow>
-        <div className={classes.blankSpace} />
-        <ToolbarButton
-          variant="default"
-          icon="plus-circle"
-          disabled={options.disableException}
-          onClick={() => openGenericDialog(DIALOG_NAMES.exceptionDialog, { isAddForm: true })}
-        >
-          Exception
-        </ToolbarButton>
-        <ToolbarButton
-          variant="default"
-          icon="plus-circle"
-          onClick={() => addEvent(true)}
-          disabled={options.disableWeeklyEvent}
-        >
-          Weekly Event
-        </ToolbarButton>
-        <ToolbarButton
-          variant="default"
-          icon="plus-circle"
-          onClick={() => addEvent(false)}
-          disabled={options.disableEvent}
-        >
-          Event
-        </ToolbarButton>
-      </ToolbarButtonRow>
+      {
+        !isNotEditable &&
+          <ToolbarButtonRow>
+            <div className={classes.blankSpace} />
+            <ToolbarButton
+              variant="default"
+              icon="plus-circle"
+              disabled={options.disableException}
+              onClick={() => openGenericDialog(DIALOG_NAMES.exceptionDialog, { isAddForm: true })}
+            >
+              Exception
+            </ToolbarButton>
+            <ToolbarButton
+              variant="default"
+              icon="plus-circle"
+              onClick={() => addEvent(true)}
+              disabled={options.disableWeeklyEvent}
+            >
+              Weekly Event
+            </ToolbarButton>
+            <ToolbarButton
+              variant="default"
+              icon="plus-circle"
+              onClick={() => addEvent(false)}
+              disabled={options.disableEvent}
+            >
+              Event
+            </ToolbarButton>
+          </ToolbarButtonRow>
+      }
       <div className={classes.calendar}>
         <CalendarHOC
           value={value}
