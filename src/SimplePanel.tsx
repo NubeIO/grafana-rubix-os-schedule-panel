@@ -70,7 +70,7 @@ export const SimplePanel: React.FC<Props> = ({ data: input, width, height }) => 
     },
   });
 
-  const { config = {} } = value.schedule || {};
+  const { config = {} } = value?.schedule ?? {};
 
   const syncData = async (data: RawData) => {
     if (!value) {
