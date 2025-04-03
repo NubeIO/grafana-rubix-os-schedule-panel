@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v1.2.0](https://github.com/NubeIO/grafana-rubix-os-schedule-panel/tree/v1.2.0) (2025-04-03)
+
+- Block user with viewer role from making changes (#13)
+
 ## [v1.1.0](https://github.com/NubeIO/grafana-rubix-os-schedule-panel/tree/v1.1.0) (2023-08-10)
 
 - Fix issues with Schedule configs and Modals
