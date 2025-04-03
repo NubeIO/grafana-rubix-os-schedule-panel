@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { PanelProps } from '@grafana/data';
 import { PanelOptions, RawData } from 'types';
 import { css, cx } from 'emotion';
@@ -6,7 +6,7 @@ import { stylesFactory, useTheme } from '@grafana/ui';
 import ScheduleCalendar from './components/ScheduleCalendar';
 import { createTheme, ThemeProvider } from '@material-ui/core';
 import { blue, red } from '@material-ui/core/colors';
-import { getDataSourceSrv } from '@grafana/runtime';
+import { getDataSourceSrv, config as grafanaConfig } from '@grafana/runtime';
 import * as writerUiService from './services/writerUiService';
 
 interface Props extends PanelProps<PanelOptions> {}
@@ -25,6 +25,11 @@ export const SimplePanel: React.FC<Props> = ({ data: input, width, height }) => 
   const palletType = theme.isDark ? 'dark' : 'light';
   const mainPrimaryColor = theme.isDark ? blue[500] : blue[900];
   const mainSecondaryColor = theme.isDark ? red[500] : red[900];
+
+  const isNotEditable = useMemo(
+    () => grafanaConfig.bootData?.user?.orgRole === 'Viewer',
+    [grafanaConfig.bootData?.user?.orgRole]
+  );
 
   useEffect(() => {
     if (isDatasourceConfigured) {
@@ -65,7 +70,7 @@ export const SimplePanel: React.FC<Props> = ({ data: input, width, height }) => 
     },
   });
 
-  const { config = {} } = value.schedule || {};
+  const { config = {} } = value?.schedule ?? {};
 
   const syncData = async (data: RawData) => {
     if (!value) {
@@ -144,6 +149,7 @@ export const SimplePanel: React.FC<Props> = ({ data: input, width, height }) => 
           isRunning={isRunning}
           options={options}
           setIsRunning={setIsRunning}
+          isNotEditable={isNotEditable}
         />
       </ThemeProvider>
       {isRunning && <div className={styles.overlayRunning} />}
