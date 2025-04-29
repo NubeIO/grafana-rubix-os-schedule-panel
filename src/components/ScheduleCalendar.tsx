@@ -151,7 +151,10 @@ function ScheduleCalendar(props: Props) {
   };
 
   const handleModalSubmit = (event: Weekly | Event, id: string) => {
-    const output: RawData = _cloneDeep(value?.schedule?.schedules || defaultSchedule) || defaultSchedule;
+    const schedules = value?.schedule?.schedules;
+    const isValid = schedules && schedules.events !== null && schedules.weekly !== null && schedules.exception !== null;
+
+    const output: RawData = _cloneDeep(isValid ? schedules : defaultSchedule);
 
     if (isWeekly) {
       output.weekly[id] = event;
