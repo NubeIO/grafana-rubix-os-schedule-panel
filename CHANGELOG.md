@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v1.2.1](https://github.com/NubeIO/grafana-rubix-os-schedule-panel/tree/v1.2.1) (2025-05-01)
+
+- Check nulls for schedules while creating new ones (#16)
+
 ## [v1.2.0](https://github.com/NubeIO/grafana-rubix-os-schedule-panel/tree/v1.2.0) (2025-04-03)
 
 - Block user with viewer role from making changes (#13)
