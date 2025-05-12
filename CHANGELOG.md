@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [v11.1.0](https://github.com/NubeIO/grafana-rubix-os-schedule-panel/tree/v11.1.0) (2025-05-12)
+
+- Remove ability to add schedule for user with viewer role (#15)
+- Check nulls for schedules while creating new ones (#17)
+
 ## [v11.0.0](https://github.com/NubeIO/grafana-rubix-os-schedule-panel/tree/v11.0.0) (2024-09-30)
 
 - Upgrade ROS Schedule Panel to Grafana v11 (#11)
