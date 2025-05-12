@@ -28,7 +28,7 @@ jobs:
       version: ${{ steps.context.outputs.version }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           token: ${{ secrets.NUBEIO_CI_GITHUB_COMMITER_PAT }}
 
@@ -64,7 +64,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - uses: actions/cache@v4
         id: cache_yarn
